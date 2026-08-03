@@ -1,0 +1,23 @@
+{
+  "username": "admin",
+  "salt": "229293c4394ed20aca2a4964b779da03",
+  "hash": "14d48df3441f86b7898d31426d4710fc9a15042071a6265f112a54b1810c55133aa90eb67512336c547528f12ef4bbcfccedc001a8776e97d1749d02c901bd3e",
+  "sessions": [
+    {
+      "token": "84fe086e104163a45d6d4d74eb6ab834028764aee4d7190b26c1fa51eab85676",
+      "exp": 1786297896717
+    },
+    {
+      "token": "f3f18f71f69fdaefb19e66e24ec151da158d4e475d13c37c8bd4b50231a94782",
+      "exp": 1786299297783
+    },
+    {
+      "token": "98dbc681bfb4426a896abcaebb0a31ee20d2276bb50ddc5cc090941ddd7e1b22",
+      "exp": 1786299470955
+    },
+    {
+      "token": "4028d31f068d294927ff3a4423ad63c812352d3af34d47e6adad3186f8703a0e",
+      "exp": 1786300656230
+    }
+  ]
+}

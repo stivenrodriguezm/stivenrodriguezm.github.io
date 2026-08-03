@@ -1,0 +1,51 @@
+[
+  {
+    "id": "dff50e87-75fe-4558-95bd-88de713853a5",
+    "slug": "texas",
+    "name": "Texas",
+    "category": "salas",
+    "price": 4500000,
+    "oldPrice": 5500000,
+    "badge": "Nuevo",
+    "shortDescription": "",
+    "description": "",
+    "features": [],
+    "materials": "",
+    "dimensions": "Sofá de 2 puestos: $5.500.000",
+    "images": [
+      "/uploads/1785714774340-d0976ab0.jpeg",
+      "/uploads/1785714774343-21caf5db.jpeg"
+    ],
+    "featured": false,
+    "active": true,
+    "createdAt": "2026-08-02T23:52:22.247Z",
+    "updatedAt": "2026-08-02T23:52:55.827Z"
+  },
+  {
+    "id": "057579ce-d773-4da2-8fb5-499c9cc3a843",
+    "slug": "chester",
+    "name": "Chester",
+    "category": "salas",
+    "price": 5500000,
+    "oldPrice": 7000000,
+    "badge": "Edición limitada",
+    "shortDescription": "Sofa chester lasdf asd fas dfa sdf a ds",
+    "description": "asd fas df asd fa sdf",
+    "features": [
+      "Cuero natural",
+      "Estructura en madera pino"
+    ],
+    "materials": "Cuero natural, madera pino,",
+    "dimensions": "22 cm diámetro × 45 cm alto",
+    "images": [
+      "/uploads/1785714954507-6acbf664.jpeg",
+      "/uploads/1785714954509-a7d08c85.jpeg",
+      "/uploads/1785714954510-6aa991df.jpeg",
+      "/uploads/1785714954512-ead5377f.jpeg"
+    ],
+    "featured": true,
+    "active": true,
+    "createdAt": "2026-08-02T23:55:55.456Z",
+    "updatedAt": "2026-08-02T23:55:55.456Z"
+  }
+]

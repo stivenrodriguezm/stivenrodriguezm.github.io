@@ -95,7 +95,7 @@ async function initDb() {
 
     isInitialized = true;
   } catch (err) {
-    console.error('[MySQL DB] Error inicializando tablas MySQL:', err.message);
+    // MySQL no disponible en local; no bloquea el sitio público
   }
 }
 

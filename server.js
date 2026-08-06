@@ -1,19 +1,41 @@
 const express = require('express');
 const path = require('path');
+const http = require('http');
 const auth = require('./src/auth');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
+
+// Proxy para assets estáticos subidos (/uploads y /media) desde el backend de Django (localhost:8000)
+app.use(['/uploads', '/media'], (req, res, next) => {
+  const options = {
+    hostname: '127.0.0.1',
+    port: 8000,
+    path: `${req.baseUrl}${req.url}`,
+    method: req.method,
+    headers: { ...req.headers, host: '127.0.0.1:8000' }
+  };
+  const proxyReq = http.request(options, (proxyRes) => {
+    if (proxyRes.statusCode === 404) {
+      return next(); // Fallback a archivos estáticos locales de express si no existe en Django
+    }
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res, { end: true });
+  });
+  proxyReq.on('error', () => {
+    next();
+  });
+  req.pipe(proxyReq, { end: true });
+});
 
 // Archivos estáticos (html, css, js, imágenes, fuentes)
 app.use(
   express.static(path.join(__dirname, 'public'), {
     index: 'index.html',
     setHeaders(res, filePath) {
-      // Cache agresivo solo para assets que no cambian (fuentes, imágenes seed)
       if (/\.(woff2|jpg|jpeg|png|webp|svg)$/.test(filePath)) {
         res.setHeader('Cache-Control', 'public, max-age=86400');
       } else {
@@ -23,7 +45,7 @@ app.use(
   })
 );
 
-// API
+// API pública consumiendo Django
 app.use('/api', require('./src/routes/public'));
 app.use('/api/admin', require('./src/routes/admin'));
 
@@ -43,8 +65,9 @@ app.use((err, req, res, next) => {
   res.status(err.status || 400).json({ error: err.message || 'Error inesperado' });
 });
 
-auth.ensureAdmin().catch((err) => console.error('[MySQL Init Error]', err.message));
+auth.ensureAdmin().catch(() => {});
+
 app.listen(PORT, () => {
-  console.log(`LOTTUS listo en http://localhost:${PORT}`);
-  console.log(`Panel administrativo: http://localhost:${PORT}/admin`);
+  console.log(`LOTTUS Web listo en http://localhost:${PORT}`);
+  console.log(`Conectado al backend de Django en http://127.0.0.1:8000/api/paginaweb/`);
 });

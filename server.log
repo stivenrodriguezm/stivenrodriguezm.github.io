@@ -1,0 +1,3 @@
+◇ injected env (5) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+LOTTUS Web listo en http://localhost:4000
+Conectado al backend de Django en http://127.0.0.1:8000/api/paginaweb/

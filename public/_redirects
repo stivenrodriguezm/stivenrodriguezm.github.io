@@ -2,6 +2,8 @@
 /api/products          https://api.muebleslottus.com/api/paginaweb/products/    200!
 /api/products/*        https://api.muebleslottus.com/api/paginaweb/products/:splat  200!
 /api/settings          https://api.muebleslottus.com/api/paginaweb/settings/    200!
+/api/asesores          https://api.muebleslottus.com/api/paginaweb/asesores/    200!
+/api/asesores/*        https://api.muebleslottus.com/api/paginaweb/asesores/:splat  200!
 
 /uploads/*             https://api.muebleslottus.com/uploads/:splat             200!
 /media/*               https://api.muebleslottus.com/media/:splat               200!
@@ -11,3 +13,4 @@
 /contacto              /contacto.html                                           200
 /admin                 /admin.html                                              200
 /producto/:slug        /producto.html                                           200
+/asesor/:slug           /asesor.html                                             200

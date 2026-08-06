@@ -1,0 +1,310 @@
+/* ==========================================================================
+   LOTTUS · Tarjeta digital de asesor — monocromo negro/blanco corporativo
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Audiowide';
+  src: url('/fonts/audiowide-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg: #000;
+  --card: #0d0d0d;
+  --card-border: rgba(255, 255, 255, 0.14);
+  --text: #fff;
+  --text-muted: rgba(255, 255, 255, 0.58);
+  --text-faint: rgba(255, 255, 255, 0.38);
+  --wa-green: #25d366;
+  --f-logo: 'Audiowide', sans-serif;
+  --f-sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+}
+
+* , *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--f-sans);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 32px 18px 56px;
+  position: relative;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+img { display: block; max-width: 100%; }
+
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+.card-container { position: relative; z-index: 1; width: 100%; max-width: 440px; }
+
+/* ---------- Estados: cargando / no encontrado ---------- */
+.state-box {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  color: var(--text-muted);
+  padding: 40px 20px;
+}
+.spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.wordmark-lg {
+  font-family: var(--f-logo);
+  font-size: 2rem;
+  letter-spacing: 0.14em;
+  color: #fff;
+}
+.state-box h1 { font-size: 1.3rem; color: #fff; }
+.state-box p { max-width: 320px; font-size: 0.92rem; line-height: 1.5; }
+
+/* ---------- Tarjeta principal ---------- */
+.profile {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 40px 30px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.8);
+  animation: cardIn 0.5s var(--ease) both;
+}
+@keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.profile-header { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+
+.brand-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.wordmark-sm {
+  font-family: var(--f-logo);
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  color: #fff;
+}
+.wordmark-sm.small { font-size: 0.9rem; }
+
+.badge-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+}
+.badge-verified svg { width: 12px; height: 12px; color: #fff; }
+
+.avatar-wrap { margin: 8px 0 4px; }
+.avatar-photo {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+}
+.avatar-fallback {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #171717;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  font-family: var(--f-logo);
+  font-size: 1.7rem;
+  color: #fff;
+}
+
+.advisor-name { font-size: 1.5rem; font-weight: 700; color: #fff; }
+.advisor-role {
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.advisor-bio { font-size: 0.92rem; color: var(--text-muted); line-height: 1.55; margin-top: 4px; }
+
+/* ---------- CTA WhatsApp ---------- */
+.wa-cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fff;
+  color: #0a0a0a;
+  border-radius: 18px;
+  padding: 16px 18px;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.wa-cta:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -14px rgba(255, 255, 255, 0.3); }
+.wa-cta-icon { flex: none; width: 42px; height: 42px; border-radius: 50%; background: var(--wa-green); display: grid; place-items: center; }
+.wa-cta-icon svg { width: 22px; height: 22px; color: #fff; }
+.wa-cta-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.wa-cta-text b { font-size: 0.98rem; }
+.wa-cta-text small { font-size: 0.76rem; color: rgba(10, 10, 10, 0.55); }
+.wa-cta-arrow svg { width: 18px; height: 18px; }
+
+/* ---------- Acciones secundarias ---------- */
+.secondary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  transition: border-color 0.3s, color 0.3s;
+}
+.secondary-btn svg { width: 16px; height: 16px; flex: none; }
+.secondary-btn:hover { border-color: rgba(255, 255, 255, 0.4); color: #fff; }
+
+.site-link {
+  display: block;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.3s;
+}
+.site-link:hover { color: #fff; }
+
+.profile-footer { text-align: center; padding-top: 12px; border-top: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 4px; }
+.profile-footer p { font-size: 0.74rem; color: var(--text-faint); }
+
+/* ---------- Botón genérico monocromo (estado no encontrado) ---------- */
+.btn-mono {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: transform 0.3s var(--ease);
+}
+.btn-mono:hover { transform: translateY(-2px); }
+
+/* ---------- Modal QR ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+  padding: 20px;
+}
+.modal-overlay.open { opacity: 1; visibility: visible; }
+.modal-card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+  padding: 34px 28px 28px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transform: scale(0.94);
+  transition: transform 0.3s var(--ease);
+}
+.modal-overlay.open .modal-card { transform: scale(1); }
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  line-height: 1;
+}
+.modal-close:hover { color: #fff; }
+.modal-title { font-size: 1.05rem; color: #fff; margin-top: 2px; }
+.qr-box { background: #fff; border-radius: 16px; padding: 14px; margin: 8px 0; }
+.qr-box img { width: 200px; height: 200px; display: block; }
+.modal-desc { font-size: 0.82rem; color: var(--text-muted); }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 20px);
+  background: #fff;
+  color: #0a0a0a;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 0.84rem;
+  font-weight: 600;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+  z-index: 30;
+}
+.toast.show { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+
+@media (max-width: 420px) {
+  .profile { padding: 32px 22px 26px; }
+}

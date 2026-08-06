@@ -20,6 +20,18 @@
   force = true
 
 [[redirects]]
+  from = "/api/asesores"
+  to = "https://api.muebleslottus.com/api/paginaweb/asesores/"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/asesores/*"
+  to = "https://api.muebleslottus.com/api/paginaweb/asesores/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/uploads/*"
   to = "https://api.muebleslottus.com/uploads/:splat"
   status = 200
@@ -54,4 +66,9 @@
 [[redirects]]
   from = "/producto/:slug"
   to = "/producto.html"
+  status = 200
+
+[[redirects]]
+  from = "/asesor/:slug"
+  to = "/asesor.html"
   status = 200

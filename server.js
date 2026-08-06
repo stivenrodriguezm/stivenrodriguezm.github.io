@@ -55,6 +55,7 @@ app.get('/sora', (req, res) => res.sendFile(path.join(__dirname, 'public', 'sora
 app.get('/contacto', (req, res) => res.sendFile(path.join(__dirname, 'public', 'contacto.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/producto/:slug', (req, res) => res.sendFile(path.join(__dirname, 'public', 'producto.html')));
+app.get(['/asesor', '/asesor/*', '/asesores'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'asesor.html')));
 
 // 404 para rutas de API desconocidas
 app.use('/api', (req, res) => res.status(404).json({ error: 'No encontrado' }));

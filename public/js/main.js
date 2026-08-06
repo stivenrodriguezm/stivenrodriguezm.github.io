@@ -219,4 +219,46 @@
       });
     });
   }
+
+  /* ---------- Asesores: tarjetas digitales ---------- */
+  const advisorsSection = document.getElementById('asesores');
+  const advisorsGrid = document.getElementById('advisorsGrid');
+  if (advisorsSection && advisorsGrid) {
+    LOTTUS.initials = (nombre) =>
+      String(nombre || '')
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((w) => w[0])
+        .join('')
+        .toUpperCase();
+
+    LOTTUS.advisorCardHTML = (a) => {
+      const photo = a.foto
+        ? `<img class="advisor-chip-photo" src="${LOTTUS.esc(a.foto)}" alt="${LOTTUS.esc(a.nombre)}" loading="lazy">`
+        : `<span class="advisor-chip-fallback" aria-hidden="true">${LOTTUS.esc(LOTTUS.initials(a.nombre)) || 'L'}</span>`;
+      return `
+        <a class="advisor-chip" href="/asesor/${LOTTUS.esc(a.slug)}">
+          ${photo}
+          <span class="advisor-chip-info">
+            <span class="advisor-chip-name">${LOTTUS.esc(a.nombre)}</span>
+            <span class="advisor-chip-role">${LOTTUS.esc(a.cargo || 'Asesor Comercial')}</span>
+          </span>
+        </a>`;
+    };
+
+    fetch('/api/asesores')
+      .then((r) => r.json())
+      .then(({ asesores }) => {
+        if (!Array.isArray(asesores) || !asesores.length) {
+          advisorsSection.hidden = true;
+          return;
+        }
+        advisorsGrid.innerHTML = asesores.map((a) => LOTTUS.advisorCardHTML(a)).join('');
+        advisorsSection.hidden = false;
+      })
+      .catch(() => {
+        advisorsSection.hidden = true;
+      });
+  }
 })();

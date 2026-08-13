@@ -34,6 +34,12 @@
 
 * , *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Sin esto, cualquier regla de esta hoja que fije `display` en un elemento
+   (.state-box, .profile, img, .avatar-fallback, etc.) le gana en cascada a
+   la regla por defecto del navegador para [hidden], y el atributo `hidden`
+   que pone asesor.js deja de ocultar nada visualmente. */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -66,7 +72,7 @@ img { display: block; max-width: 100%; }
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
 }
 
-.card-container { position: relative; z-index: 1; width: 100%; max-width: 440px; }
+.card-container { position: relative; z-index: 1; width: 100%; max-width: 440px; min-width: 0; }
 
 /* ---------- Estados: cargando / no encontrado ---------- */
 .state-box {
@@ -114,7 +120,7 @@ img { display: block; max-width: 100%; }
 
 .profile-header { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
 
-.brand-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.brand-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 6px; min-width: 0; }
 .wordmark-sm {
   font-family: var(--f-logo);
   font-size: 1.05rem;
@@ -176,24 +182,26 @@ img { display: block; max-width: 100%; }
   color: #0a0a0a;
   border-radius: 18px;
   padding: 16px 18px;
+  min-width: 0;
   transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
 }
 .wa-cta:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -14px rgba(255, 255, 255, 0.3); }
 .wa-cta-icon { flex: none; width: 42px; height: 42px; border-radius: 50%; background: var(--wa-green); display: grid; place-items: center; }
 .wa-cta-icon svg { width: 22px; height: 22px; color: #fff; }
-.wa-cta-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.wa-cta-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .wa-cta-text b { font-size: 0.98rem; }
-.wa-cta-text small { font-size: 0.76rem; color: rgba(10, 10, 10, 0.55); }
+.wa-cta-text small { display: block; font-size: 0.76rem; color: rgba(10, 10, 10, 0.55); overflow-wrap: break-word; }
 .wa-cta-arrow svg { width: 18px; height: 18px; }
 
 /* ---------- Acciones secundarias ---------- */
-.secondary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.secondary-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .secondary-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 12px;
+  min-width: 0;
   border: 1px solid var(--card-border);
   border-radius: 14px;
   font-size: 0.82rem;

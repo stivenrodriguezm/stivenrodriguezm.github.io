@@ -751,6 +751,20 @@ input, select, textarea { font-family: inherit; }
 }
 .cta-final .container { position: relative; display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .cta-final .section-title { font-size: clamp(2rem, 4.6vw, 3.4rem); }
+.location-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  border-radius: 100px;
+  background: rgba(201, 162, 39, 0.07);
+  color: var(--text-light);
+  font-size: 0.9rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.location-pill:hover { background: rgba(201, 162, 39, 0.14); border-color: rgba(201, 162, 39, 0.6); }
+.location-pill svg { color: var(--gold); }
 
 /* ---------- Footer ---------- */
 .footer { background: var(--black); border-top: 1px solid rgba(201, 162, 39, 0.16); padding: 80px 0 0; }

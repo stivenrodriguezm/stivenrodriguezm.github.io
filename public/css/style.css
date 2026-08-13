@@ -542,7 +542,7 @@ input, select, textarea { font-family: inherit; }
   gap: 22px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 24px 6px 60px;
+  padding: 24px 50px 60px;
   scrollbar-width: none;
 }
 .carousel::-webkit-scrollbar { display: none; }

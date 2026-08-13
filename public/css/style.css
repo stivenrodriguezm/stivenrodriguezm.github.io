@@ -476,7 +476,7 @@ input, select, textarea { font-family: inherit; }
   display: flex;
   flex-direction: column;
 }
-.product-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
+.product-card:hover, .product-card.reveal.visible:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
 .pc-media { position: relative; aspect-ratio: 4 / 4.6; overflow: hidden; background: var(--cream); }
 .pc-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.9s var(--ease); }
 .product-card:hover .pc-media img { transform: scale(1.08); }
@@ -542,7 +542,7 @@ input, select, textarea { font-family: inherit; }
   gap: 22px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 24px 50px 60px;
+  padding: 40px 90px 90px;
   scrollbar-width: none;
 }
 .carousel::-webkit-scrollbar { display: none; }

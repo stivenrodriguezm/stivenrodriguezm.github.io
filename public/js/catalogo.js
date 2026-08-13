@@ -60,7 +60,7 @@
     if (state.q) p.set('q', state.q);
     if (state.sort) p.set('sort', state.sort);
 
-    fetch('/api/products?' + p.toString())
+    fetch(L.apiUrl('products/') + '?' + p.toString())
       .then((r) => r.json())
       .then(({ products, categories: cats }) => {
         if (cats && cats.length && !categories.length) {

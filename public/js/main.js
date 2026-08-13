@@ -36,6 +36,21 @@
     return `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
   };
 
+  /* ---------- Backend: local (Express proxy) vs. GitHub Pages (Django directo) ---------- */
+  const isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '';
+  LOTTUS.API_ORIGIN = isLocalHost ? '' : 'https://api.muebleslottus.com';
+
+  // suffix ej: 'products/', 'products/mi-slug/', 'settings/', 'asesores/'
+  LOTTUS.apiUrl = (suffix) =>
+    LOTTUS.API_ORIGIN ? `${LOTTUS.API_ORIGIN}/api/paginaweb/${suffix}` : `/api/${suffix}`;
+
+  // convierte rutas relativas de imágenes (/uploads/..., /media/...) del backend en absolutas
+  LOTTUS.assetUrl = (u) => {
+    if (!u) return u;
+    if (/^https?:\/\//i.test(u)) return u;
+    return LOTTUS.API_ORIGIN + u;
+  };
+
   const ICON_ARROW =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   LOTTUS.ICON_ARROW = ICON_ARROW;
@@ -69,7 +84,7 @@
       <a class="product-card reveal visible" href="/producto/${LOTTUS.esc(p.slug)}">
         <div class="pc-media">
           ${badge}
-          <img src="${LOTTUS.esc(img)}" alt="${LOTTUS.esc(p.name)}" loading="lazy">
+          <img src="${LOTTUS.esc(LOTTUS.assetUrl(img))}" alt="${LOTTUS.esc(p.name)}" loading="lazy">
           <span class="pc-view">Ver detalle</span>
         </div>
         <div class="pc-body">
@@ -162,7 +177,7 @@
   });
 
   /* ---------- Settings del sitio ---------- */
-  fetch('/api/settings')
+  fetch(LOTTUS.apiUrl('settings/'))
     .then((r) => r.json())
     .then(({ settings, categories }) => {
       LOTTUS.settings = settings;
@@ -199,7 +214,7 @@
   /* ---------- Home: productos destacados ---------- */
   const featuredTrack = document.getElementById('featuredTrack');
   if (featuredTrack) {
-    fetch('/api/products?featured=1')
+    fetch(LOTTUS.apiUrl('products/') + '?featured=1')
       .then((r) => r.json())
       .then(({ products, categories }) => {
         if (!products.length) {
@@ -235,7 +250,7 @@
 
     LOTTUS.advisorCardHTML = (a) => {
       const photo = a.foto
-        ? `<img class="advisor-chip-photo" src="${LOTTUS.esc(a.foto)}" alt="${LOTTUS.esc(a.nombre)}" loading="lazy">`
+        ? `<img class="advisor-chip-photo" src="${LOTTUS.esc(LOTTUS.assetUrl(a.foto))}" alt="${LOTTUS.esc(a.nombre)}" loading="lazy">`
         : `<span class="advisor-chip-fallback" aria-hidden="true">${LOTTUS.esc(LOTTUS.initials(a.nombre)) || 'L'}</span>`;
       return `
         <a class="advisor-chip" href="/asesor/${LOTTUS.esc(a.slug)}">
@@ -247,7 +262,7 @@
         </a>`;
     };
 
-    fetch('/api/asesores')
+    fetch(LOTTUS.apiUrl('asesores/'))
       .then((r) => r.json())
       .then(({ asesores }) => {
         if (!Array.isArray(asesores) || !asesores.length) {

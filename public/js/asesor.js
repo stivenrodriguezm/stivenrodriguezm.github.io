@@ -4,6 +4,15 @@
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
 
+  const isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '';
+  const API_ORIGIN = isLocalHost ? '' : 'https://api.muebleslottus.com';
+  const apiUrl = (suffix) => (API_ORIGIN ? `${API_ORIGIN}/api/paginaweb/${suffix}` : `/api/${suffix}`);
+  const assetUrl = (u) => {
+    if (!u) return u;
+    if (/^https?:\/\//i.test(u)) return u;
+    return API_ORIGIN + u;
+  };
+
   function initials(nombre) {
     return String(nombre || '')
       .trim()
@@ -42,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (controller) controller.abort();
     }, 6000);
 
-    fetch(`/api/asesores/${encodeURIComponent(targetSlug)}`, controller ? { signal: controller.signal } : {})
+    fetch(apiUrl(`asesores/${encodeURIComponent(targetSlug)}/`), controller ? { signal: controller.signal } : {})
       .then((r) => {
         clearTimeout(timeoutId);
         if (!r.ok) throw new Error('not found');
@@ -61,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (!slug) {
-    fetch('/api/asesores')
+    fetch(apiUrl('asesores/'))
       .then((r) => r.json())
       .then((data) => {
         const list = data.asesores || (Array.isArray(data) ? data : []);
@@ -96,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const photoEl = document.getElementById('advisorPhoto');
     const fallbackEl = document.getElementById('advisorAvatarFallback');
     if (a.foto) {
-      photoEl.src = a.foto;
+      photoEl.src = assetUrl(a.foto);
       photoEl.alt = a.nombre || '';
       photoEl.hidden = false;
     } else {
@@ -114,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const qrImg = document.getElementById('qrImg');
     if (qrImg) {
-      qrImg.src = `/api/asesores/${encodeURIComponent(activeSlug)}/qr.png`;
+      qrImg.src = apiUrl(`asesores/${encodeURIComponent(activeSlug)}/qr.png`);
     }
 
     if (loadingState) loadingState.hidden = true;

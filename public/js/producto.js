@@ -383,11 +383,19 @@
 
   if (!slug) return notFound();
 
-  fetch('/api/products/' + encodeURIComponent(slug))
+  fetch(L.apiUrl('products/') + encodeURIComponent(slug) + '/')
     .then((r) => {
       if (!r.ok) throw new Error('not found');
       return r.json();
     })
-    .then(({ product, related, categories }) => render(product, related, categories))
+    .then(({ product, related, categories }) => {
+      if (product && Array.isArray(product.images)) {
+        product.images = product.images.map(L.assetUrl);
+      }
+      (related || []).forEach((r) => {
+        if (Array.isArray(r.images)) r.images = r.images.map(L.assetUrl);
+      });
+      render(product, related, categories);
+    })
     .catch(notFound);
 })();

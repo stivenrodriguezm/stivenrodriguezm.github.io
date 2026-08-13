@@ -20,7 +20,7 @@
       <article class="model-card reveal${p.featured ? ' model-card--fav' : ''}">
         ${p.featured ? '<span class="model-ribbon">El favorito</span>' : ''}
         <a href="/producto/${L.esc(p.slug)}" class="model-media">
-          <img src="${L.esc(img)}" alt="${L.esc(p.name)}" loading="lazy">
+          <img src="${L.esc(L.assetUrl(img))}" alt="${L.esc(p.name)}" loading="lazy">
         </a>
         <div class="model-body">
           <span class="pc-cat">Sora by LOTTUS</span>
@@ -52,7 +52,7 @@
     });
   }
 
-  fetch('/api/products?category=sora&sort=price-asc')
+  fetch(L.apiUrl('products/') + '?category=sora&sort=price-asc')
     .then((r) => r.json())
     .then(({ products }) => {
       if (!products.length) {

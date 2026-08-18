@@ -205,6 +205,15 @@
     const lbClose = document.getElementById('pdlbClose');
     const lbBackdrop = document.getElementById('pdlbBackdrop');
 
+    // Puntero fino + hover real (mouse/trackpad) vs táctil: cambia tanto el
+    // texto de ayuda como qué gestos de zoom se activan más abajo.
+    const hoverZoomMQ = window.matchMedia('(hover: hover) and (pointer: fine)');
+    if (lbZoomHint) {
+      lbZoomHint.textContent = hoverZoomMQ.matches
+        ? 'Rueda del mouse o doble clic para ampliar · arrastra para mover'
+        : 'Pellizca o doble toque para ampliar';
+    }
+
     function updateMainImage(index) {
       if (index < 0 || index >= allImages.length) return;
       currentIndex = index;
@@ -300,6 +309,25 @@
       pdMain.addEventListener('click', () => openLightbox(currentIndex));
     }
 
+    // ---- Zoom por hover en escritorio (lupa que sigue el cursor) ----
+    // En un mouse/trackpad real no hace falta clic ni pellizco: acercar el
+    // cursor a la pieza ya la amplía in-situ, como en una ficha de producto
+    // tradicional. Se activa solo en dispositivos con hover real + puntero
+    // fino, para no interferir con el tap-para-abrir-galería en táctil.
+    if (pdMain && mainImg && hoverZoomMQ.matches) {
+      pdMain.addEventListener('mousemove', (e) => {
+        const rect = pdMain.getBoundingClientRect();
+        const px = ((e.clientX - rect.left) / rect.width) * 100;
+        const py = ((e.clientY - rect.top) / rect.height) * 100;
+        mainImg.style.transformOrigin = `${px}% ${py}%`;
+      });
+      pdMain.addEventListener('mouseenter', () => mainImg.classList.add('hover-zoom'));
+      pdMain.addEventListener('mouseleave', () => {
+        mainImg.classList.remove('hover-zoom');
+        mainImg.style.transformOrigin = '';
+      });
+    }
+
     if (lbClose) lbClose.addEventListener('click', closeLightbox);
     if (lbBackdrop) lbBackdrop.addEventListener('click', closeLightbox);
     if (lbPrev) lbPrev.addEventListener('click', () => setLbIndex(currentIndex - 1));
@@ -349,20 +377,28 @@
     }
 
     function captureNaturalSize() {
-      const prevTransform = lbImg.style.transform;
-      lbImg.style.transition = 'none';
-      lbImg.style.transform = '';
-      const r = lbImg.getBoundingClientRect();
-      natW = r.width;
-      natH = r.height;
-      lbImg.style.transform = prevTransform;
+      // Se calcula a partir de las dimensiones reales de la imagen y del
+      // viewport (no del recuadro del stage en reposo): así el rango de
+      // paneo siempre corresponde a la pantalla completa, que es donde
+      // realmente crece la imagen al ampliar (ver CSS .is-zoomed), en vez
+      // de quedar limitado al tamaño chico del stage sin zoom.
+      const iw = lbImg.naturalWidth || 1600;
+      const ih = lbImg.naturalHeight || 1600;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      if (iw / ih > vw / vh) {
+        natW = vw;
+        natH = vw * (ih / iw);
+      } else {
+        natH = vh;
+        natW = vh * (iw / ih);
+      }
     }
 
     function zoomAt(clientX, clientY, targetScale, animate) {
       if (!natW || !natH) captureNaturalSize();
-      const stageRect = lbStage.getBoundingClientRect();
-      const cx = stageRect.left + stageRect.width / 2;
-      const cy = stageRect.top + stageRect.height / 2;
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
       const dx = clientX - cx, dy = clientY - cy;
       const newScale = Math.min(ZMAX, Math.max(ZMIN, targetScale));
       const ratio = newScale / zScale;
@@ -455,6 +491,15 @@
       };
       lbStage.addEventListener('pointerup', onPointerUp);
       lbStage.addEventListener('pointercancel', onPointerUp);
+
+      // Zoom con la rueda del mouse / trackpad (además de doble clic),
+      // centrado en la posición del cursor — el gesto que un usuario de
+      // escritorio espera encontrar primero.
+      lbStage.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.2 : 1 / 1.2;
+        zoomAt(e.clientX, e.clientY, zScale * factor, false);
+      }, { passive: false });
     }
 
     window.addEventListener('resize', () => {

@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const http = require('http');
-const auth = require('./src/auth');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -47,13 +46,11 @@ app.use(
 
 // API pública consumiendo Django
 app.use('/api', require('./src/routes/public'));
-app.use('/api/admin', require('./src/routes/admin'));
 
 // URLs limpias para las páginas
 app.get('/catalogo', (req, res) => res.sendFile(path.join(__dirname, 'public', 'catalogo.html')));
 app.get('/sora', (req, res) => res.sendFile(path.join(__dirname, 'public', 'sora.html')));
 app.get('/contacto', (req, res) => res.sendFile(path.join(__dirname, 'public', 'contacto.html')));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/producto/:slug', (req, res) => res.sendFile(path.join(__dirname, 'public', 'producto.html')));
 app.get(['/asesor', /^\/asesor\/.*/, '/asesores'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'asesor.html')));
 
@@ -65,8 +62,6 @@ app.use((err, req, res, next) => {
   console.error(err.message);
   res.status(err.status || 400).json({ error: err.message || 'Error inesperado' });
 });
-
-auth.ensureAdmin().catch(() => {});
 
 app.listen(PORT, () => {
   console.log(`LOTTUS Web listo en http://localhost:${PORT}`);

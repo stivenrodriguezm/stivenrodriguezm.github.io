@@ -10,9 +10,6 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^5.1.0",
-    "multer": "^2.0.2",
-    "mysql2": "^3.23.2"
+    "express": "^5.1.0"
   }
 }

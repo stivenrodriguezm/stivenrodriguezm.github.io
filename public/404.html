@@ -8,7 +8,7 @@
 <body>
   <script>
     // GitHub Pages no soporta rewrites del servidor: para las URLs "bonitas"
-    // (/catalogo, /sora, /contacto, /admin, /producto/:slug, /asesor/:slug)
+    // (/catalogo, /sora, /contacto, /producto/:slug, /asesor/:slug)
     // GH Pages devuelve este 404.html manteniendo la URL original en la barra.
     // Aquí cargamos el HTML real correspondiente sin navegar, así la URL no cambia
     // y el JS de cada página (que lee el slug desde location.pathname) sigue funcionando.
@@ -21,7 +21,6 @@
       else if (path === '/catalogo' || path === '/catalogo/') target = '/catalogo.html';
       else if (path === '/sora' || path === '/sora/') target = '/sora.html';
       else if (path === '/contacto' || path === '/contacto/') target = '/contacto.html';
-      else if (path === '/admin' || path === '/admin/') target = '/admin.html';
 
       if (!target) {
         document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding:80px 20px"><h1>404 — Página no encontrada</h1><p><a href="/">Volver al inicio</a></p></div>';

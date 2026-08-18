@@ -49,7 +49,8 @@
     hideError();
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Radicando...';
+    submitBtn.classList.add('btn-loading');
+    submitBtn.innerHTML = '<span class="btn-spinner"></span> Radicando...';
 
     try {
       const res = await fetch(L.apiUrl('pqrs/'), {
@@ -75,6 +76,7 @@
       showError(err.message || 'No se pudo enviar tu solicitud. Intenta de nuevo en unos minutos.');
     } finally {
       submitBtn.disabled = false;
+      submitBtn.classList.remove('btn-loading');
       submitBtn.textContent = 'Radicar PQRS';
     }
   });

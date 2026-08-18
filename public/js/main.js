@@ -55,6 +55,23 @@
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   LOTTUS.ICON_ARROW = ICON_ARROW;
 
+  // Tarjetas "esqueleto" (shimmer) para mostrar mientras se cargan productos —
+  // reemplazan el vacío en blanco durante el fetch inicial o al cambiar filtros.
+  LOTTUS.skeletonCardsHTML = (count) =>
+    Array.from({ length: count || 3 })
+      .map(
+        () => `
+      <div class="product-card skeleton-card" aria-hidden="true">
+        <div class="pc-media skeleton-shimmer"></div>
+        <div class="pc-body">
+          <div class="skeleton-line skeleton-shimmer" style="width:40%"></div>
+          <div class="skeleton-line skeleton-shimmer" style="width:75%;height:16px;margin-top:8px"></div>
+          <div class="skeleton-line skeleton-shimmer" style="width:35%;height:16px;margin-top:10px"></div>
+        </div>
+      </div>`
+      )
+      .join('');
+
   LOTTUS.cardHTML = (p, categories) => {
     const cat = (categories || []).find((c) => c.slug === p.category);
     const img = (p.images && p.images[0]) || '';
@@ -176,6 +193,24 @@
     el.textContent = new Date().getFullYear();
   });
 
+  /* ---------- Re-alinea el scroll a un #hash (ej. #nosotros) si el contenido
+     que carga async arriba (destacados, imágenes) desplaza la sección después
+     del salto inicial del navegador. Se cancela si el usuario ya interactúa. ---------- */
+  let hashRealignPending = !!location.hash;
+  if (hashRealignPending) {
+    const cancelHashRealign = () => { hashRealignPending = false; };
+    ['wheel', 'touchstart', 'keydown'].forEach((evt) =>
+      window.addEventListener(evt, cancelHashRealign, { once: true, passive: true })
+    );
+  }
+  LOTTUS.realignToHash = () => {
+    if (!hashRealignPending || !location.hash) return;
+    let target;
+    try { target = document.querySelector(location.hash); } catch (e) { return; }
+    if (target) target.scrollIntoView({ behavior: 'auto', block: 'start' });
+  };
+  window.addEventListener('load', () => setTimeout(LOTTUS.realignToHash, 150));
+
   /* ---------- Settings del sitio ---------- */
   fetch(LOTTUS.apiUrl('settings/'))
     .then((r) => r.json())
@@ -214,6 +249,8 @@
   /* ---------- Home: productos destacados ---------- */
   const featuredTrack = document.getElementById('featuredTrack');
   if (featuredTrack) {
+    featuredTrack.innerHTML = LOTTUS.skeletonCardsHTML ? LOTTUS.skeletonCardsHTML(4) : '';
+    if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.wait();
     fetch(LOTTUS.apiUrl('products/') + '?featured=1')
       .then((r) => r.json())
       .then(({ products, categories }) => {
@@ -225,6 +262,13 @@
       })
       .catch(() => {
         featuredTrack.innerHTML = '<p style="color:var(--text-mid)">No se pudieron cargar los productos.</p>';
+      })
+      .finally(() => {
+        if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.done();
+        // Este carrusel va antes de #nosotros en el DOM: si el usuario llegó vía
+        // /#nosotros desde otra página, insertarlo puede correr la sección hacia
+        // abajo después del salto inicial. Re-alineamos una vez que ya se insertó.
+        requestAnimationFrame(() => requestAnimationFrame(LOTTUS.realignToHash));
       });
 
     document.querySelectorAll('[data-car]').forEach((btn) => {
@@ -262,6 +306,7 @@
         </a>`;
     };
 
+    if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.wait();
     fetch(LOTTUS.apiUrl('asesores/'))
       .then((r) => r.json())
       .then(({ asesores }) => {
@@ -274,6 +319,9 @@
       })
       .catch(() => {
         advisorsSection.hidden = true;
+      })
+      .finally(() => {
+        if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.done();
       });
   }
 })();

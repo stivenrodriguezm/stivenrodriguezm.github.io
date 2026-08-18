@@ -27,6 +27,26 @@
 </head>
 
 <body>
+  <!-- Barra de progreso de navegación (sin loader de marca: página liviana pensada
+       para clics rápidos desde bio de Instagram, un splash completo la haría más lenta) -->
+  <div id="navProgress" class="nav-progress" aria-hidden="true"></div>
+  <script>
+  (function () {
+    var bar = document.getElementById('navProgress');
+    if (!bar) return;
+    document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target.closest('a[href]');
+      if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+      var href = a.getAttribute('href') || '';
+      if (!href || href.charAt(0) === '#' || /^(mailto:|tel:|javascript:)/i.test(href)) return;
+      if (a.origin && a.origin !== location.origin) return;
+      bar.classList.add('is-active');
+    });
+    window.addEventListener('pageshow', function () { bar.classList.remove('is-active'); });
+  })();
+  </script>
+
   <!-- Fondo decorativo con luces y gradiente ahumado -->
   <div class="bg-lights" aria-hidden="true">
     <div class="glow-orb orb-1"></div>

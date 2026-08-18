@@ -14,6 +14,53 @@
 
 <body>
 
+  <!-- Loader de marca + barra de progreso de navegación -->
+  <div id="pageLoader" class="page-loader" role="status" aria-live="polite" aria-label="Cargando LOTTUS">
+    <div class="page-loader-mark">
+      <span class="page-loader-word">LOTTUS</span>
+      <span class="page-loader-bar"></span>
+    </div>
+  </div>
+  <div id="navProgress" class="nav-progress" aria-hidden="true"></div>
+  <script>
+  (function () {
+    var loaderEl = document.getElementById('pageLoader');
+    var hidden = false, shownAt = Date.now(), pending = 0, MIN_MS = 420;
+    function reallyHide() {
+      if (hidden || !loaderEl) return;
+      hidden = true;
+      var wait = Math.max(0, MIN_MS - (Date.now() - shownAt));
+      setTimeout(function () {
+        loaderEl.classList.add('is-hidden');
+        setTimeout(function () { loaderEl.remove(); }, 550);
+      }, wait);
+    }
+    if (loaderEl) {
+      window.addEventListener('load', reallyHide);
+      setTimeout(reallyHide, 2500);
+    }
+    window.LOTTUS_LOADER = {
+      wait: function () { pending++; },
+      done: function () { if (--pending <= 0) reallyHide(); },
+      hide: reallyHide,
+    };
+
+    var bar = document.getElementById('navProgress');
+    if (bar) {
+      document.addEventListener('click', function (e) {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        var a = e.target.closest('a[href]');
+        if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+        var href = a.getAttribute('href') || '';
+        if (!href || href.charAt(0) === '#' || /^(mailto:|tel:|javascript:)/i.test(href)) return;
+        if (a.origin && a.origin !== location.origin) return;
+        bar.classList.add('is-active');
+      });
+      window.addEventListener('pageshow', function () { bar.classList.remove('is-active'); });
+    }
+  })();
+  </script>
+
   <!-- Navegación -->
   <header class="nav">
     <div class="container nav-inner">
@@ -341,24 +388,24 @@
       <span class="eyebrow eyebrow--center reveal">Experiencia presencial</span>
       <h2 class="section-title reveal" data-delay="1">Vive las piezas en <em>nuestros showrooms</em></h2>
       <div class="dual-location reveal" data-delay="2" style="display:flex; gap:2rem; justify-content:center; flex-wrap:wrap; margin:0.5rem 0 0">
-        <div class="location-pill">
+        <a class="location-pill" href="https://maps.google.com/?q=Cra.+50+%2374a-45,+Bogot%C3%A1,+Colombia" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:16px;height:16px;flex-shrink:0">
             <path d="M12 21s-7-5.1-7-11a7 7 0 0114 0c0 5.9-7 11-7 11z" />
             <circle cx="12" cy="10" r="2.5" />
           </svg>
           <span><strong>Sede 1</strong> · Cra. 50 #74a-45</span>
-        </div>
-        <div class="location-pill">
+        </a>
+        <a class="location-pill" href="https://maps.google.com/?q=Calle+74+%2330-10,+Bogot%C3%A1,+Colombia" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:16px;height:16px;flex-shrink:0">
             <path d="M12 21s-7-5.1-7-11a7 7 0 0114 0c0 5.9-7 11-7 11z" />
             <circle cx="12" cy="10" r="2.5" />
           </svg>
           <span><strong>Sede 2</strong> · Calle 74 #30-10</span>
-        </div>
+        </a>
       </div>
-      <p class="section-sub reveal" data-delay="2" style="margin-top:0.75rem"><span data-setting="hours">Lun a Sáb 10:00 a.m.–6:30 p.m.</span> · Bogotá D.C.</p>
+      <p class="section-sub reveal" data-delay="2" style="margin-top:0.75rem"><span data-setting="hours">Lunes a sábado: 10:00 a.m. – 6:30 p.m., Domingos y festivos de 11:00 a.m. a 4:30 p.m.</span> · Bogotá D.C.</p>
       <div class="hero-ctas reveal" data-delay="3" style="margin-top:14px">
-        <a href="/contacto" class="btn btn-gold">Cómo llegar
+        <a href="/contacto#como-llegar" class="btn btn-gold">Cómo llegar
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
             <path d="M12 21s-7-5.1-7-11a7 7 0 0114 0c0 5.9-7 11-7 11z" />
             <circle cx="12" cy="10" r="2.5" />

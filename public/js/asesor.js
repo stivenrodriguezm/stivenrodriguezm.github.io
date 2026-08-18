@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loadingState) loadingState.hidden = true;
     if (profileView) profileView.hidden = true;
     if (notFoundState) notFoundState.hidden = false;
+    if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.hide();
   }
 
   function fetchAdvisorProfile(targetSlug) {
@@ -129,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loadingState) loadingState.hidden = true;
     if (notFoundState) notFoundState.hidden = true;
     if (profileView) profileView.hidden = false;
+    if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.hide();
   }
 
   /* ---------- QR modal ---------- */

@@ -52,6 +52,7 @@
     });
   }
 
+  if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.wait();
   fetch(L.apiUrl('products/') + '?category=sora&sort=price-asc')
     .then((r) => r.json())
     .then(({ products }) => {
@@ -67,6 +68,9 @@
     .catch(() => {
       grid.innerHTML =
         '<div class="empty-state" style="grid-column:1/-1"><h3>Error de conexión</h3><p>No pudimos cargar las referencias. Recarga la página.</p></div>';
+    })
+    .finally(() => {
+      if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.done();
     });
 
   document.addEventListener('lottus:settings', wireModelWa, { once: true });

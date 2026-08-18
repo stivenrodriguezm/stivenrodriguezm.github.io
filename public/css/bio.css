@@ -774,3 +774,18 @@ body {
     padding: 6px 10px;
   }
 }
+
+/* Barra de progreso de navegación (feedback instantáneo al tocar un enlace) */
+.nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0;
+  z-index: 999;
+  background: var(--gold-gradient);
+  box-shadow: 0 0 10px var(--gold-glow);
+  opacity: 0;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+.nav-progress.is-active { opacity: 1; width: 76%; }

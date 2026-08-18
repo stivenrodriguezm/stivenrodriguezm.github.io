@@ -10,6 +10,53 @@
 </head>
 <body class="light-page">
 
+  <!-- Loader de marca + barra de progreso de navegación -->
+  <div id="pageLoader" class="page-loader" role="status" aria-live="polite" aria-label="Cargando LOTTUS">
+    <div class="page-loader-mark">
+      <span class="page-loader-word">LOTTUS</span>
+      <span class="page-loader-bar"></span>
+    </div>
+  </div>
+  <div id="navProgress" class="nav-progress" aria-hidden="true"></div>
+  <script>
+  (function () {
+    var loaderEl = document.getElementById('pageLoader');
+    var hidden = false, shownAt = Date.now(), pending = 0, MIN_MS = 420;
+    function reallyHide() {
+      if (hidden || !loaderEl) return;
+      hidden = true;
+      var wait = Math.max(0, MIN_MS - (Date.now() - shownAt));
+      setTimeout(function () {
+        loaderEl.classList.add('is-hidden');
+        setTimeout(function () { loaderEl.remove(); }, 550);
+      }, wait);
+    }
+    if (loaderEl) {
+      window.addEventListener('load', reallyHide);
+      setTimeout(reallyHide, 2500);
+    }
+    window.LOTTUS_LOADER = {
+      wait: function () { pending++; },
+      done: function () { if (--pending <= 0) reallyHide(); },
+      hide: reallyHide,
+    };
+
+    var bar = document.getElementById('navProgress');
+    if (bar) {
+      document.addEventListener('click', function (e) {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        var a = e.target.closest('a[href]');
+        if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+        var href = a.getAttribute('href') || '';
+        if (!href || href.charAt(0) === '#' || /^(mailto:|tel:|javascript:)/i.test(href)) return;
+        if (a.origin && a.origin !== location.origin) return;
+        bar.classList.add('is-active');
+      });
+      window.addEventListener('pageshow', function () { bar.classList.remove('is-active'); });
+    }
+  })();
+  </script>
+
   <header class="nav">
     <div class="container nav-inner">
       <a href="/" class="nav-logo wordmark">LOTTUS</a>
@@ -100,14 +147,6 @@
 
     <div class="contact-info">
       <div class="info-item">
-        <span class="i-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-5.1-7-11a7 7 0 0114 0c0 5.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
-        <div>
-          <b>Showrooms &mdash; Bogotá D.C.</b>
-          <p style="margin:6px 0 2px"><strong>Sede 1</strong><br>Cra. 50 #74a-45</p>
-          <p style="margin:0"><strong>Sede 2</strong><br>Calle 74 #30-10</p>
-        </div>
-      </div>
-      <div class="info-item">
         <span class="i-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.13.96.36 1.9.7 2.8a2 2 0 01-.45 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0122 16.9z"/></svg></span>
         <div><b>Teléfono</b><p data-setting="phone">+57 (601) 761 9348</p></div>
       </div>
@@ -130,6 +169,7 @@
           </div>
         </div>
       </div>
+      <h3 id="como-llegar" class="location-cards-title">Cómo llegar</h3>
       <div class="location-cards">
         <div class="location-card">
           <span class="i-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-5.1-7-11a7 7 0 0114 0c0 5.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>

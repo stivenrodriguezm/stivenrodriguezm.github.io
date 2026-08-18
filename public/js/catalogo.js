@@ -60,6 +60,16 @@
     if (state.q) p.set('q', state.q);
     if (state.sort) p.set('sort', state.sort);
 
+    // Primera carga: la grilla está vacía, se llena con esqueletos. En
+    // cambios de filtro posteriores, en vez de vaciarla (parpadeo feo) se
+    // atenúa el contenido actual hasta que llega la respuesta nueva.
+    if (!grid.children.length) {
+      grid.innerHTML = L.skeletonCardsHTML(8);
+    } else {
+      grid.classList.add('is-loading');
+    }
+    if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.wait();
+
     fetch(L.apiUrl('products/') + '?' + p.toString())
       .then((r) => r.json())
       .then(({ products, categories: cats }) => {
@@ -80,6 +90,10 @@
       .catch(() => {
         grid.innerHTML =
           '<div class="empty-state" style="grid-column:1/-1"><h3>Error de conexión</h3><p>No pudimos cargar el catálogo. Recarga la página.</p></div>';
+      })
+      .finally(() => {
+        grid.classList.remove('is-loading');
+        if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.done();
       });
   }
 

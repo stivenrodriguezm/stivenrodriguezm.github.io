@@ -567,21 +567,27 @@
     }
   }
 
-  if (!slug) return notFound();
-
-  fetch(L.apiUrl('products/') + encodeURIComponent(slug) + '/')
-    .then((r) => {
-      if (!r.ok) throw new Error('not found');
-      return r.json();
-    })
-    .then(({ product, related, categories }) => {
-      if (product && Array.isArray(product.images)) {
-        product.images = product.images.map(L.assetUrl);
-      }
-      (related || []).forEach((r) => {
-        if (Array.isArray(r.images)) r.images = r.images.map(L.assetUrl);
+  if (!slug) {
+    notFound();
+  } else {
+    if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.wait();
+    fetch(L.apiUrl('products/') + encodeURIComponent(slug) + '/')
+      .then((r) => {
+        if (!r.ok) throw new Error('not found');
+        return r.json();
+      })
+      .then(({ product, related, categories }) => {
+        if (product && Array.isArray(product.images)) {
+          product.images = product.images.map(L.assetUrl);
+        }
+        (related || []).forEach((r) => {
+          if (Array.isArray(r.images)) r.images = r.images.map(L.assetUrl);
+        });
+        render(product, related, categories);
+      })
+      .catch(notFound)
+      .finally(() => {
+        if (window.LOTTUS_LOADER) window.LOTTUS_LOADER.done();
       });
-      render(product, related, categories);
-    })
-    .catch(notFound);
+  }
 })();

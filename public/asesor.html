@@ -14,6 +14,53 @@
 </head>
 
 <body>
+  <!-- Loader de marca + barra de progreso de navegación -->
+  <div id="pageLoader" class="page-loader" role="status" aria-live="polite" aria-label="Cargando LOTTUS">
+    <div class="page-loader-mark">
+      <span class="page-loader-word">LOTTUS</span>
+      <span class="page-loader-bar"></span>
+    </div>
+  </div>
+  <div id="navProgress" class="nav-progress" aria-hidden="true"></div>
+  <script>
+  (function () {
+    var loaderEl = document.getElementById('pageLoader');
+    var hidden = false, shownAt = Date.now(), pending = 0, MIN_MS = 420;
+    function reallyHide() {
+      if (hidden || !loaderEl) return;
+      hidden = true;
+      var wait = Math.max(0, MIN_MS - (Date.now() - shownAt));
+      setTimeout(function () {
+        loaderEl.classList.add('is-hidden');
+        setTimeout(function () { loaderEl.remove(); }, 550);
+      }, wait);
+    }
+    if (loaderEl) {
+      window.addEventListener('load', reallyHide);
+      setTimeout(reallyHide, 2500);
+    }
+    window.LOTTUS_LOADER = {
+      wait: function () { pending++; },
+      done: function () { if (--pending <= 0) reallyHide(); },
+      hide: reallyHide,
+    };
+
+    var bar = document.getElementById('navProgress');
+    if (bar) {
+      document.addEventListener('click', function (e) {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        var a = e.target.closest('a[href]');
+        if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+        var href = a.getAttribute('href') || '';
+        if (!href || href.charAt(0) === '#' || /^(mailto:|tel:|javascript:)/i.test(href)) return;
+        if (a.origin && a.origin !== location.origin) return;
+        bar.classList.add('is-active');
+      });
+      window.addEventListener('pageshow', function () { bar.classList.remove('is-active'); });
+    }
+  })();
+  </script>
+
   <div class="bg-grid" aria-hidden="true"></div>
 
   <main class="card-container">

@@ -51,64 +51,36 @@
     <div class="contact-card">
       <div id="pqrsFormWrap">
         <h2>Radica tu PQRS</h2>
-        <p>Petición, Queja, Reclamo o Sugerencia: este es el canal formal para radicar tu caso. Queda registrado con un número de radicado y te respondemos por correo en máximo 2 días hábiles. Para algo más rápido e informal usa el botón de WhatsApp de la esquina.</p>
+        <p>Queda registrado con un número de radicado y te respondemos por correo en máximo 2 días hábiles.</p>
         <form id="contactForm" novalidate>
-          <div class="form-field">
-            <label>¿Qué quieres radicar?</label>
-            <div class="pqrs-type-selector" role="radiogroup" aria-label="Tipo de PQRS">
-              <label class="pqrs-type-card">
-                <input type="radio" name="fType" value="peticion" checked>
-                <span class="pqrs-type-card-title">Petición</span>
-                <span class="pqrs-type-card-desc">Solicita información, un servicio o un trámite.</span>
-              </label>
-              <label class="pqrs-type-card">
-                <input type="radio" name="fType" value="queja">
-                <span class="pqrs-type-card-title">Queja</span>
-                <span class="pqrs-type-card-desc">Manifiesta tu inconformidad con la atención recibida.</span>
-              </label>
-              <label class="pqrs-type-card">
-                <input type="radio" name="fType" value="reclamo">
-                <span class="pqrs-type-card-title">Reclamo</span>
-                <span class="pqrs-type-card-desc">Exige la solución a un problema con tu compra o pedido.</span>
-              </label>
-              <label class="pqrs-type-card">
-                <input type="radio" name="fType" value="sugerencia">
-                <span class="pqrs-type-card-title">Sugerencia</span>
-                <span class="pqrs-type-card-desc">Comparte una idea para que mejoremos.</span>
-              </label>
-            </div>
-          </div>
           <div class="form-row">
+            <div class="form-field">
+              <label for="fType">Tipo de PQRS</label>
+              <select id="fType">
+                <option value="peticion">Petición</option>
+                <option value="queja">Queja</option>
+                <option value="reclamo">Reclamo</option>
+                <option value="sugerencia">Sugerencia</option>
+              </select>
+            </div>
             <div class="form-field">
               <label for="fName">Nombre completo</label>
               <input type="text" id="fName" placeholder="Tu nombre" required>
             </div>
+          </div>
+          <div class="form-row">
             <div class="form-field">
               <label for="fEmail">Correo electrónico</label>
               <input type="email" id="fEmail" placeholder="tucorreo@mail.com" required>
             </div>
-          </div>
-          <div class="form-row">
             <div class="form-field">
               <label for="fPhone">Teléfono (opcional)</label>
               <input type="tel" id="fPhone" placeholder="300 000 0000">
             </div>
-            <div class="form-field">
-              <label for="fSubject">Categoría</label>
-              <select id="fSubject">
-                <option>Producto o calidad</option>
-                <option>Pedido o entrega</option>
-                <option>Garantía o postventa</option>
-                <option>Atención al cliente</option>
-                <option>Facturación o pagos</option>
-                <option>Colchones Sora</option>
-                <option>Otro</option>
-              </select>
-            </div>
           </div>
           <div class="form-field">
-            <label for="fMsg">Describe tu caso</label>
-            <textarea id="fMsg" placeholder="Cuéntanos con el mayor detalle posible qué pasó, qué producto o pedido está involucrado y qué esperas que hagamos…" required></textarea>
+            <label for="fMsg">Mensaje</label>
+            <textarea id="fMsg" placeholder="Cuéntanos qué pasó y qué esperas que hagamos…" required></textarea>
           </div>
           <p id="formError" style="color:#b03a2e; font-size:.85rem; margin-bottom:14px; display:none"></p>
           <button type="submit" class="btn btn-gold" id="fSubmit">Radicar PQRS</button>

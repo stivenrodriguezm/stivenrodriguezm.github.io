@@ -12,10 +12,10 @@
   const form = document.getElementById('contactForm');
   const errorEl = document.getElementById('formError');
   const submitBtn = document.getElementById('fSubmit');
+  const typeEl = document.getElementById('fType');
   const nameEl = document.getElementById('fName');
   const emailEl = document.getElementById('fEmail');
   const phoneEl = document.getElementById('fPhone');
-  const subjectEl = document.getElementById('fSubject');
   const msgEl = document.getElementById('fMsg');
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,13 +32,11 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const tipo = typeEl.value;
     const nombre = nameEl.value.trim();
     const email = emailEl.value.trim();
     const telefono = phoneEl.value.trim();
-    const asunto = subjectEl.value;
     const mensaje = msgEl.value.trim();
-    const tipoInput = form.querySelector('input[name="fType"]:checked');
-    const tipo = tipoInput ? tipoInput.value : 'peticion';
 
     if (!nombre || !email || !mensaje) {
       showError('Completa nombre, correo y mensaje para continuar.');
@@ -57,7 +55,7 @@
       const res = await fetch(L.apiUrl('pqrs/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo, asunto, nombre, email, telefono, mensaje }),
+        body: JSON.stringify({ tipo, nombre, email, telefono, mensaje }),
       });
       const data = await res.json();
 

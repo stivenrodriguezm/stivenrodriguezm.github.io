@@ -195,7 +195,9 @@
     const pdMain = document.getElementById('pdMain');
 
     const lbModal = document.getElementById('pdLightbox');
+    const lbStage = document.getElementById('pdlbStage');
     const lbImg = document.getElementById('pdlbImg');
+    const lbZoomHint = document.getElementById('pdlbZoomHint');
     const lbCounter = document.getElementById('pdlbCounter');
     const lbThumbs = document.getElementById('pdlbThumbs');
     const lbPrev = document.getElementById('pdlbPrev');
@@ -250,6 +252,7 @@
     function setLbIndex(index) {
       if (!allImages.length) return;
       currentIndex = (index + allImages.length) % allImages.length;
+      resetZoom(false);
 
       content.querySelectorAll('.pd-thumb').forEach((b, i) => {
         b.classList.toggle('active', i === currentIndex);
@@ -279,12 +282,18 @@
       lbModal.classList.add('open');
       lbModal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      if (lbZoomHint) {
+        lbZoomHint.style.animation = 'none';
+        void lbZoomHint.offsetWidth;
+        lbZoomHint.style.animation = '';
+      }
     }
 
     function closeLightbox() {
       lbModal.classList.remove('open');
       lbModal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      resetZoom(false);
     }
 
     if (pdMain) {
@@ -306,19 +315,151 @@
     window._pdlbKeyHandler = onKeyDown;
     window.addEventListener('keydown', onKeyDown);
 
-    let touchStartX = 0;
-    lbModal.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
+    // ---- Zoom & pan del lightbox: pinch, doble-tap/doble-clic, arrastre ----
+    // Reemplaza el swipe basado en touchstart/touchend (que solo miraba
+    // changedTouches[0] y por eso confundía un pellizco con dos dedos con
+    // un swipe, cambiando de foto sin querer al hacer zoom).
+    const ZMIN = 1, ZMAX = 4, ZDOUBLE_TAP = 2.6;
+    let zScale = 1, zX = 0, zY = 0;
+    let natW = 0, natH = 0;
+    const pointers = new Map();
+    let pinchStartDist = 0, pinchStartScale = 1;
+    let panLast = null;
+    let sessionHadPinch = false;
+    let tapStart = null;
+    let lastTap = { time: 0, x: 0, y: 0 };
 
-    lbModal.addEventListener('touchend', (e) => {
-      const touchEndX = e.changedTouches[0].screenX;
-      const diff = touchEndX - touchStartX;
-      if (Math.abs(diff) > 40) {
-        if (diff > 0) setLbIndex(currentIndex - 1);
-        else setLbIndex(currentIndex + 1);
-      }
-    }, { passive: true });
+    function applyZoomTransform(animate) {
+      lbImg.style.transition = animate ? 'transform 0.28s var(--ease)' : 'none';
+      lbImg.style.transform = zScale > 1.001 ? `translate(${zX}px, ${zY}px) scale(${zScale})` : '';
+      lbModal.classList.toggle('is-zoomed', zScale > 1.02);
+    }
+
+    function clampPan() {
+      const maxX = Math.max(0, (natW * zScale - natW) / 2);
+      const maxY = Math.max(0, (natH * zScale - natH) / 2);
+      zX = Math.min(maxX, Math.max(-maxX, zX));
+      zY = Math.min(maxY, Math.max(-maxY, zY));
+    }
+
+    function resetZoom(animate) {
+      zScale = 1; zX = 0; zY = 0;
+      natW = 0; natH = 0;
+      applyZoomTransform(animate);
+    }
+
+    function captureNaturalSize() {
+      const prevTransform = lbImg.style.transform;
+      lbImg.style.transition = 'none';
+      lbImg.style.transform = '';
+      const r = lbImg.getBoundingClientRect();
+      natW = r.width;
+      natH = r.height;
+      lbImg.style.transform = prevTransform;
+    }
+
+    function zoomAt(clientX, clientY, targetScale, animate) {
+      if (!natW || !natH) captureNaturalSize();
+      const stageRect = lbStage.getBoundingClientRect();
+      const cx = stageRect.left + stageRect.width / 2;
+      const cy = stageRect.top + stageRect.height / 2;
+      const dx = clientX - cx, dy = clientY - cy;
+      const newScale = Math.min(ZMAX, Math.max(ZMIN, targetScale));
+      const ratio = newScale / zScale;
+      zX = dx - (dx - zX) * ratio;
+      zY = dy - (dy - zY) * ratio;
+      zScale = newScale;
+      clampPan();
+      applyZoomTransform(animate);
+    }
+
+    function toggleDoubleZoom(clientX, clientY) {
+      if (zScale > 1.02) resetZoom(true);
+      else zoomAt(clientX, clientY, ZDOUBLE_TAP, true);
+    }
+
+    function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+    function midpoint(a, b) { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+
+    if (lbStage) {
+      lbStage.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        try { lbStage.setPointerCapture(e.pointerId); } catch (err) { /* iOS Safari a veces falla aquí; seguimos igual */ }
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (pointers.size === 1) {
+          tapStart = { x: e.clientX, y: e.clientY };
+          panLast = { x: e.clientX, y: e.clientY };
+        } else if (pointers.size === 2) {
+          sessionHadPinch = true;
+          tapStart = null;
+          const pts = [...pointers.values()];
+          pinchStartDist = dist(pts[0], pts[1]);
+          pinchStartScale = zScale;
+        }
+      });
+
+      lbStage.addEventListener('pointermove', (e) => {
+        if (!pointers.has(e.pointerId)) return;
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (pointers.size === 2) {
+          e.preventDefault();
+          const pts = [...pointers.values()];
+          const d = dist(pts[0], pts[1]);
+          const mid = midpoint(pts[0], pts[1]);
+          if (pinchStartDist > 0) zoomAt(mid.x, mid.y, pinchStartScale * (d / pinchStartDist), false);
+          return;
+        }
+
+        if (pointers.size === 1 && zScale > 1.02) {
+          e.preventDefault();
+          lbStage.classList.add('panning');
+          zX += e.clientX - panLast.x;
+          zY += e.clientY - panLast.y;
+          panLast = { x: e.clientX, y: e.clientY };
+          clampPan();
+          applyZoomTransform(false);
+        }
+      });
+
+      const onPointerUp = (e) => {
+        const wasTracked = pointers.has(e.pointerId);
+        pointers.delete(e.pointerId);
+        lbStage.classList.remove('panning');
+        if (pointers.size > 0) return;
+
+        if (zScale < 1.02) resetZoom(zScale !== 1);
+        else if (zScale > ZMAX) { zScale = ZMAX; clampPan(); applyZoomTransform(true); }
+
+        if (!sessionHadPinch && tapStart && wasTracked) {
+          const dx = e.clientX - tapStart.x;
+          const dy = e.clientY - tapStart.y;
+          if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+            // Tap: funciona a cualquier nivel de zoom (el doble tap también des-zoomea).
+            const now = Date.now();
+            if (now - lastTap.time < 320 && Math.abs(e.clientX - lastTap.x) < 30 && Math.abs(e.clientY - lastTap.y) < 30) {
+              toggleDoubleZoom(e.clientX, e.clientY);
+              lastTap.time = 0;
+            } else {
+              lastTap = { time: now, x: e.clientX, y: e.clientY };
+            }
+          } else if (zScale <= 1.02 && Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+            // Swipe para cambiar de foto: solo cuando no hay zoom activo (si no, el arrastre hace pan).
+            if (dx > 0) setLbIndex(currentIndex - 1);
+            else setLbIndex(currentIndex + 1);
+          }
+        }
+        sessionHadPinch = false;
+        tapStart = null;
+      };
+      lbStage.addEventListener('pointerup', onPointerUp);
+      lbStage.addEventListener('pointercancel', onPointerUp);
+    }
+
+    window.addEventListener('resize', () => {
+      if (lbModal.classList.contains('open')) resetZoom(false);
+    });
 
     // WhatsApp dinámico con soporte de variante seleccionada
     let selectedVariant = null;

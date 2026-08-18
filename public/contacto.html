@@ -96,9 +96,14 @@
 
   <main class="container contact-grid">
     <div class="contact-card">
+      <div class="pqrs-tabs" role="tablist" aria-label="PQRS">
+        <button type="button" class="pqrs-tab active" id="pqrsTabNew" role="tab" aria-selected="true">Radicar PQRS</button>
+        <button type="button" class="pqrs-tab" id="pqrsTabTrack" role="tab" aria-selected="false">Consultar PQRS</button>
+      </div>
+
       <div id="pqrsFormWrap">
         <h2>Radica tu PQRS</h2>
-        <p>Queda registrado con un número de radicado y te respondemos por correo en máximo 2 días hábiles.</p>
+        <p>Queda registrado con un número de radicado y te respondemos por correo en máximo 10 días hábiles.</p>
         <form id="contactForm" novalidate>
           <div class="form-row">
             <div class="form-field">
@@ -142,6 +147,40 @@
         <p>Te enviamos un correo de confirmación. Guarda este número de radicado para cualquier consulta sobre tu caso:</p>
         <div class="pqrs-radicado-box" id="pqrsRadicado">PQRS-XXXXXXXX</div>
         <button type="button" class="btn btn-outline-dark" id="pqrsNewMsg">Radicar otro caso</button>
+      </div>
+
+      <div id="pqrsTrackWrap" style="display:none">
+        <h2>Consulta el estado de tu PQRS</h2>
+        <p>Ingresa el radicado que recibiste por correo junto con el mismo correo con el que lo creaste, para ver el estado y el histórico completo de tu caso.</p>
+        <form id="trackForm" novalidate>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="tRadicado">Número de radicado</label>
+              <input type="text" id="tRadicado" placeholder="PQRS-XXXXXXXX" required>
+            </div>
+            <div class="form-field">
+              <label for="tEmail">Correo con el que lo creaste</label>
+              <input type="email" id="tEmail" placeholder="tucorreo@mail.com" required>
+            </div>
+          </div>
+          <p id="trackError" style="color:#b03a2e; font-size:.85rem; margin-bottom:14px; display:none"></p>
+          <button type="submit" class="btn btn-gold" id="trackSubmit">Consultar</button>
+        </form>
+
+        <div id="trackResult" class="pqrs-track-result" style="display:none">
+          <div class="pqrs-track-head">
+            <div class="pqrs-track-head-info">
+              <span class="pqrs-track-radicado" id="trRadicado">PQRS-XXXXXXXX</span>
+              <span class="pqrs-track-type" id="trTipo"></span>
+            </div>
+            <span class="pqrs-status-badge" id="trEstado"></span>
+          </div>
+          <p class="pqrs-track-date" id="trFecha"></p>
+
+          <div class="pqrs-timeline" id="trTimeline"></div>
+
+          <button type="button" class="btn btn-outline-dark" id="trackAnother">Consultar otro radicado</button>
+        </div>
       </div>
     </div>
 

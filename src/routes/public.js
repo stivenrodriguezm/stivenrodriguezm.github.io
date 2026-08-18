@@ -157,4 +157,18 @@ router.post('/pqrs', async (req, res) => {
   }
 });
 
+// POST /api/pqrs/rastrear — consulta pública de un PQRS por radicado + correo
+router.post('/pqrs/rastrear', async (req, res) => {
+  try {
+    const data = await postJson(`${BACKEND_URL}/pqrs/rastrear/`, req.body);
+    res.status(200).json(data);
+  } catch (err) {
+    if (err.status && err.data) {
+      return res.status(err.status).json(err.data);
+    }
+    console.error('Error consultando PQRS en Django:', err);
+    res.status(err.status || 500).json({ error: 'No se pudo consultar tu PQRS. Intenta de nuevo.' });
+  }
+});
+
 module.exports = router;

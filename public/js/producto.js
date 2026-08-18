@@ -197,6 +197,7 @@
     const lbModal = document.getElementById('pdLightbox');
     const lbStage = document.getElementById('pdlbStage');
     const lbImg = document.getElementById('pdlbImg');
+    const lbBg = document.getElementById('pdlbBg');
     const lbZoomHint = document.getElementById('pdlbZoomHint');
     const lbCounter = document.getElementById('pdlbCounter');
     const lbThumbs = document.getElementById('pdlbThumbs');
@@ -269,9 +270,14 @@
       mainImg.src = allImages[currentIndex];
 
       lbImg.classList.add('fade');
+      if (lbBg) lbBg.classList.remove('visible');
       setTimeout(() => {
         lbImg.src = allImages[currentIndex];
         lbImg.onload = () => lbImg.classList.remove('fade');
+        if (lbBg) {
+          lbBg.style.backgroundImage = `url("${allImages[currentIndex]}")`;
+          lbBg.classList.add('visible');
+        }
       }, 150);
 
       lbCounter.textContent = `${currentIndex + 1} / ${allImages.length}`;
@@ -307,25 +313,6 @@
 
     if (pdMain) {
       pdMain.addEventListener('click', () => openLightbox(currentIndex));
-    }
-
-    // ---- Zoom por hover en escritorio (lupa que sigue el cursor) ----
-    // En un mouse/trackpad real no hace falta clic ni pellizco: acercar el
-    // cursor a la pieza ya la amplía in-situ, como en una ficha de producto
-    // tradicional. Se activa solo en dispositivos con hover real + puntero
-    // fino, para no interferir con el tap-para-abrir-galería en táctil.
-    if (pdMain && mainImg && hoverZoomMQ.matches) {
-      pdMain.addEventListener('mousemove', (e) => {
-        const rect = pdMain.getBoundingClientRect();
-        const px = ((e.clientX - rect.left) / rect.width) * 100;
-        const py = ((e.clientY - rect.top) / rect.height) * 100;
-        mainImg.style.transformOrigin = `${px}% ${py}%`;
-      });
-      pdMain.addEventListener('mouseenter', () => mainImg.classList.add('hover-zoom'));
-      pdMain.addEventListener('mouseleave', () => {
-        mainImg.classList.remove('hover-zoom');
-        mainImg.style.transformOrigin = '';
-      });
     }
 
     if (lbClose) lbClose.addEventListener('click', closeLightbox);

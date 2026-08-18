@@ -89,4 +89,142 @@
       formWrap.style.display = 'block';
     });
   }
+
+  /* ---------- Tabs: Radicar / Consultar PQRS ---------- */
+  const tabNew = document.getElementById('pqrsTabNew');
+  const tabTrack = document.getElementById('pqrsTabTrack');
+  const trackWrap = document.getElementById('pqrsTrackWrap');
+
+  function activateTab(which) {
+    const isNew = which === 'new';
+    tabNew.classList.toggle('active', isNew);
+    tabNew.setAttribute('aria-selected', String(isNew));
+    tabTrack.classList.toggle('active', !isNew);
+    tabTrack.setAttribute('aria-selected', String(!isNew));
+    trackWrap.style.display = isNew ? 'none' : 'block';
+    if (isNew) {
+      // Conserva lo que ya se veía en el lado "nuevo" (formulario o éxito).
+      formWrap.style.display = successPanel.style.display === 'block' ? 'none' : 'block';
+    } else {
+      formWrap.style.display = 'none';
+      successPanel.style.display = 'none';
+    }
+  }
+
+  if (tabNew && tabTrack && trackWrap) {
+    tabNew.addEventListener('click', () => activateTab('new'));
+    tabTrack.addEventListener('click', () => activateTab('track'));
+  }
+
+  /* ---------- Consultar PQRS por radicado ---------- */
+  const trackForm = document.getElementById('trackForm');
+  const trackErrorEl = document.getElementById('trackError');
+  const trackSubmitBtn = document.getElementById('trackSubmit');
+  const radicadoInput = document.getElementById('tRadicado');
+  const trackEmailInput = document.getElementById('tEmail');
+  const trackResult = document.getElementById('trackResult');
+  const trackAnotherBtn = document.getElementById('trackAnother');
+
+  const trRadicadoEl = document.getElementById('trRadicado');
+  const trTipoEl = document.getElementById('trTipo');
+  const trEstadoEl = document.getElementById('trEstado');
+  const trFechaEl = document.getElementById('trFecha');
+  const trTimelineEl = document.getElementById('trTimeline');
+
+  const ESTADO_LABELS = {
+    recibido: 'Recibido',
+    en_proceso: 'En proceso',
+    respondido: 'Respondido',
+    cerrado: 'Cerrado',
+  };
+
+  function formatTrackDate(iso) {
+    if (!iso) return '';
+    try {
+      return new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
+    } catch (e) {
+      return iso;
+    }
+  }
+
+  function renderTrackResult(data) {
+    trRadicadoEl.textContent = data.radicado || '';
+    trTipoEl.textContent = data.tipoDisplay || data.tipo || '';
+
+    const estado = data.estado || 'recibido';
+    trEstadoEl.textContent = data.estadoDisplay || ESTADO_LABELS[estado] || estado;
+    trEstadoEl.className = 'pqrs-status-badge pqrs-status-badge--' + estado;
+    trFechaEl.textContent = 'Radicado el ' + formatTrackDate(data.createdAt);
+
+    const items = [{ autor: 'Tú', mensaje: data.mensaje, fecha: data.createdAt, isClient: true }];
+    (data.respuestas || []).forEach((r) => {
+      items.push({ autor: 'LOTTUS', mensaje: r.mensaje, fecha: r.fecha, isClient: false });
+    });
+
+    trTimelineEl.innerHTML = items
+      .map(
+        (it) => `
+      <div class="pqrs-timeline-item${it.isClient ? ' pqrs-timeline-item--client' : ''}">
+        <span class="pqrs-timeline-dot"></span>
+        <div class="pqrs-timeline-body">
+          <div class="pqrs-timeline-author">${L.esc(it.autor)}</div>
+          <div class="pqrs-timeline-msg">${L.esc(it.mensaje)}</div>
+          <div class="pqrs-timeline-date">${formatTrackDate(it.fecha)}</div>
+        </div>
+      </div>`
+      )
+      .join('');
+
+    trackForm.style.display = 'none';
+    trackResult.style.display = 'block';
+  }
+
+  if (trackForm) {
+    trackForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const radicado = radicadoInput.value.trim();
+      const email = trackEmailInput.value.trim();
+
+      if (!radicado || !email) {
+        trackErrorEl.textContent = 'Ingresa el radicado y el correo con el que lo creaste.';
+        trackErrorEl.style.display = 'block';
+        return;
+      }
+      trackErrorEl.style.display = 'none';
+
+      trackSubmitBtn.disabled = true;
+      trackSubmitBtn.classList.add('btn-loading');
+      trackSubmitBtn.innerHTML = '<span class="btn-spinner"></span> Consultando...';
+
+      try {
+        const res = await fetch(L.apiUrl('pqrs/rastrear/'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ radicado, email }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'No encontramos un PQRS con esos datos.');
+        }
+        renderTrackResult(data);
+      } catch (err) {
+        trackErrorEl.textContent = err.message || 'No se pudo consultar tu PQRS. Intenta de nuevo.';
+        trackErrorEl.style.display = 'block';
+      } finally {
+        trackSubmitBtn.disabled = false;
+        trackSubmitBtn.classList.remove('btn-loading');
+        trackSubmitBtn.textContent = 'Consultar';
+      }
+    });
+  }
+
+  if (trackAnotherBtn) {
+    trackAnotherBtn.addEventListener('click', () => {
+      trackForm.reset();
+      trackErrorEl.style.display = 'none';
+      trackResult.style.display = 'none';
+      trackForm.style.display = 'block';
+    });
+  }
 })();

@@ -23,6 +23,44 @@ const fetchJson = (url) => {
   });
 };
 
+const postJson = (url, body) => {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(body);
+    const { hostname, port, pathname, search } = new URL(url);
+    const req = http.request(
+      {
+        hostname,
+        port,
+        path: pathname + search,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload),
+        },
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          let parsed;
+          try {
+            parsed = JSON.parse(data);
+          } catch (e) {
+            return reject({ status: 502, message: data });
+          }
+          if (res.statusCode >= 400) {
+            return reject({ status: res.statusCode, data: parsed });
+          }
+          resolve(parsed);
+        });
+      }
+    );
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+};
+
 // GET /api/products?category=&q=&featured=1&sort=price-asc|price-desc|new
 router.get('/products', async (req, res, next) => {
   try {
@@ -103,6 +141,20 @@ router.get('/asesores/:slug/qr.png', (req, res) => {
       upstream.pipe(res);
     })
     .on('error', () => res.status(502).json({ error: 'Error al conectar con el generador de QR' }));
+});
+
+// POST /api/pqrs — crea un ticket PQRS desde el formulario de Contacto
+router.post('/pqrs', async (req, res) => {
+  try {
+    const data = await postJson(`${BACKEND_URL}/pqrs/`, req.body);
+    res.status(201).json(data);
+  } catch (err) {
+    if (err.status && err.data) {
+      return res.status(err.status).json(err.data);
+    }
+    console.error('Error creando PQRS en Django:', err);
+    res.status(err.status || 500).json({ error: 'No se pudo enviar tu solicitud. Intenta de nuevo.' });
+  }
 });
 
 module.exports = router;

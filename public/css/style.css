@@ -1223,6 +1223,49 @@ input, select, textarea { font-family: inherit; }
   box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.14);
 }
 .form-field textarea { resize: vertical; min-height: 120px; }
+
+/* Tipo de PQRS: selector principal del formulario, tarjetas grandes */
+.pqrs-type-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 4px; }
+.pqrs-type-card {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 14px 12px; border-radius: 14px;
+  border: 1.5px solid rgba(10, 10, 10, 0.14);
+  background: var(--paper);
+  cursor: pointer; transition: border-color 0.25s, background 0.25s, transform 0.2s;
+}
+.pqrs-type-card input { position: absolute; opacity: 0; width: 0; height: 0; }
+.pqrs-type-card-title {
+  font-size: 0.86rem; font-weight: 700; color: var(--text-dark);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.pqrs-type-card-desc { font-size: 0.78rem; line-height: 1.4; color: var(--text-mid); }
+.pqrs-type-card:hover { border-color: rgba(201, 162, 39, 0.5); transform: translateY(-2px); }
+.pqrs-type-card:has(input:checked) {
+  border-color: var(--gold); background: rgba(201, 162, 39, 0.1);
+}
+.pqrs-type-card:has(input:checked) .pqrs-type-card-title { color: #8a6d12; }
+.pqrs-type-card:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .pqrs-type-selector { grid-template-columns: 1fr 1fr; }
+}
+
+/* Confirmación de envío de PQRS */
+.pqrs-success { text-align: center; padding: 20px 0 8px; }
+.pqrs-success-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--ink); color: var(--gold-2);
+  display: grid; place-items: center; margin: 0 auto 20px;
+}
+.pqrs-success-icon svg { width: 28px; height: 28px; }
+.pqrs-success h2 { font-family: var(--f-serif); font-size: 1.6rem; margin-bottom: 10px; }
+.pqrs-success p { color: var(--text-mid); font-size: 0.94rem; max-width: 380px; margin: 0 auto 20px; }
+.pqrs-radicado-box {
+  display: inline-block; font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 1.15rem; font-weight: 700; letter-spacing: 0.05em; color: var(--text-dark);
+  background: var(--paper); border: 1px dashed var(--gold);
+  border-radius: 14px; padding: 12px 24px; margin-bottom: 26px;
+}
+
 .contact-info { display: flex; flex-direction: column; gap: 22px; }
 .info-item { display: flex; gap: 18px; align-items: flex-start; }
 .info-item .i-icon {

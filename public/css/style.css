@@ -762,7 +762,7 @@ input, select, textarea { font-family: inherit; }
   gap: 12px;
   overflow-x: auto;
   flex: 1;
-  padding-bottom: 4px;
+  padding: 8px 0;
   scrollbar-width: thin;
 }
 

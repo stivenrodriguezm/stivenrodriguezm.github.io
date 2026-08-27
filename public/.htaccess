@@ -1,0 +1,18 @@
+# LOTTUS — reescrituras para las URLs "bonitas" del sitio en hosting Apache
+# (Hostinger). Equivalente en producción a las rutas que server.js resuelve
+# en desarrollo local. Reescritura interna: la URL en el navegador no cambia,
+# solo se sirve el archivo HTML real correspondiente con código 200.
+
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^catalogo/?$ catalogo.html [L]
+RewriteRule ^sora/?$ sora.html [L]
+RewriteRule ^contacto/?$ contacto.html [L]
+RewriteRule ^producto/[^/]+/?$ producto.html [L]
+RewriteRule ^asesores/?$ asesor.html [L]
+RewriteRule ^asesor(/[^/]+)?/?$ asesor.html [L]
+
+# Página de error propia de LOTTUS en vez de la página por defecto de Hostinger
+ErrorDocument 404 /404.html

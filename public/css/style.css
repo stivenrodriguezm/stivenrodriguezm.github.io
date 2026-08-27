@@ -66,6 +66,7 @@
   --sora-line: #2d5254;
   --sora-accent: #6b8586;
   --sora-mist: #eef2f2;
+  --sora-glow: #93a7a8;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -701,6 +702,9 @@ input, select, textarea { font-family: inherit; }
   border-radius: 22px;
   z-index: -1;
 }
+.sora-eyebrow { color: var(--sora-glow); }
+.sora-eyebrow::before { background: var(--sora-glow); }
+.sora-sec .section-title em { color: var(--sora-glow); }
 .sora-brand { line-height: 1; }
 .sora-logo-mark { width: clamp(160px, 20vw, 220px); height: auto; }
 .sora-brand small {
@@ -1566,6 +1570,21 @@ input, select, textarea { font-family: inherit; }
 /* ============================================================
    PÁGINA SORA (marca de colchones)
    ============================================================ */
+/* Sobrescribe el dorado de LOTTUS en tipografía compartida (eyebrow, énfasis
+   en títulos, indicador de scroll) solo dentro de esta página: Sora tiene su
+   propia identidad verde-teal. */
+.page-sora .eyebrow, .page-sora .eyebrow--center { color: var(--sora-glow); }
+.page-sora .eyebrow::before,
+.page-sora .eyebrow--center::after { background: var(--sora-glow); }
+.page-sora .section-title em { color: var(--sora-glow); }
+.page-sora .hero-scroll::after { background: linear-gradient(180deg, var(--sora-glow), transparent); }
+.page-sora .sec-light .eyebrow,
+.page-sora .sec-light .eyebrow--center { color: var(--sora-ink); }
+.page-sora .sec-light .eyebrow::before,
+.page-sora .sec-light .eyebrow--center::after { background: var(--sora-ink); }
+.page-sora .sec-light .section-title em { color: var(--sora-ink); }
+.page-sora .cta-final::before { background: radial-gradient(ellipse 70% 80% at 50% 120%, rgba(8, 51, 54, 0.35), transparent 70%); }
+
 .sora-hero {
   position: relative;
   min-height: 100svh;
@@ -1586,7 +1605,7 @@ input, select, textarea { font-family: inherit; }
 .sora-logo-mark--hero {
   width: clamp(260px, 46vw, 520px);
   height: auto;
-  margin: 22px 0 6px;
+  margin: 22px auto 6px;
   filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.45));
 }
 .sora-wordmark-by {

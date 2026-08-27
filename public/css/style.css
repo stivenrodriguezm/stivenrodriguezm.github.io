@@ -59,6 +59,13 @@
   --shadow-sm: 0 8px 24px -10px rgba(10, 10, 10, 0.16);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --nav-h: 72px;
+
+  /* Marca Sora (independiente de la paleta LOTTUS, tomada del logo/ficha técnica oficiales) */
+  --sora-ink: #083336;
+  --sora-ink-2: #052123;
+  --sora-line: #2d5254;
+  --sora-accent: #6b8586;
+  --sora-mist: #eef2f2;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -161,6 +168,19 @@ input, select, textarea { font-family: inherit; }
 .btn-dark:hover { background: var(--black); transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .btn-outline-dark { border: 1px solid rgba(10, 10, 10, 0.25); color: var(--text-dark); }
 .btn-outline-dark:hover { border-color: var(--gold); color: #8a6d12; transform: translateY(-3px); }
+.btn-sora {
+  background: linear-gradient(120deg, var(--sora-ink) 0%, var(--sora-line) 100%);
+  color: #fff;
+  box-shadow: 0 12px 30px -10px rgba(8, 51, 54, 0.55);
+}
+.btn-sora:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -12px rgba(8, 51, 54, 0.65); }
+.btn-sora-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(4px);
+}
+.btn-sora-ghost:hover { border-color: var(--sora-accent); color: #fff; background: rgba(8, 51, 54, 0.35); transform: translateY(-3px); }
 .btn-loading { pointer-events: none; opacity: 0.85; transform: none !important; }
 .btn-spinner {
   width: 14px;
@@ -620,7 +640,7 @@ input, select, textarea { font-family: inherit; }
   color: var(--black);
 }
 .badge--oferta { background: #b03a2e; color: #fff; }
-.badge--sora { background: var(--blue); color: #fff; }
+.badge--sora { background: var(--sora-ink); color: #fff; }
 .badge--nuevo { background: var(--green); color: #fff; }
 .badge--edicion { background: var(--black); color: var(--gold-2); border: 1px solid var(--gold); }
 .pc-body { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
@@ -667,7 +687,7 @@ input, select, textarea { font-family: inherit; }
   right: -10%;
   width: 55%;
   height: 120%;
-  background: radial-gradient(ellipse, rgba(29, 78, 95, 0.35), transparent 65%);
+  background: radial-gradient(ellipse, rgba(8, 51, 54, 0.45), transparent 65%);
   pointer-events: none;
 }
 .sora-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 70px; align-items: center; position: relative; }
@@ -677,28 +697,23 @@ input, select, textarea { font-family: inherit; }
   content: '';
   position: absolute;
   inset: 22px -22px -22px 22px;
-  border: 1px solid rgba(42, 107, 130, 0.5);
+  border: 1px solid rgba(107, 133, 134, 0.5);
   border-radius: 22px;
   z-index: -1;
 }
-.sora-brand {
-  font-family: var(--f-logo);
-  font-size: clamp(2rem, 4.6vw, 3.2rem);
-  letter-spacing: 0.22em;
-  color: #fff;
-  line-height: 1;
-}
+.sora-brand { line-height: 1; }
+.sora-logo-mark { width: clamp(160px, 20vw, 220px); height: auto; }
 .sora-brand small {
   display: block;
   font-family: var(--f-sans);
   font-size: 0.72rem;
   letter-spacing: 0.4em;
-  color: var(--blue-2);
-  margin-top: 10px;
+  color: var(--sora-accent);
+  margin-top: 14px;
 }
 .sora-benefits { list-style: none; margin: 30px 0 36px; display: grid; gap: 14px; }
 .sora-benefits li { display: flex; gap: 14px; align-items: flex-start; color: rgba(255, 255, 255, 0.82); font-size: 0.95rem; }
-.sora-benefits svg { width: 19px; height: 19px; flex: none; color: var(--gold); margin-top: 3px; }
+.sora-benefits svg { width: 19px; height: 19px; flex: none; color: var(--sora-accent); margin-top: 3px; }
 
 /* ---------- Stats ---------- */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; text-align: center; }
@@ -1564,27 +1579,21 @@ input, select, textarea { font-family: inherit; }
 .sora-hero .hero-bg img { animation: kenburns 24s var(--ease) infinite alternate; }
 .sora-hero .hero-bg::after {
   background:
-    radial-gradient(ellipse 80% 55% at 50% 40%, rgba(29, 78, 95, 0.28), transparent 70%),
+    radial-gradient(ellipse 80% 55% at 50% 40%, rgba(8, 51, 54, 0.4), transparent 70%),
     radial-gradient(ellipse 90% 60% at 50% 42%, rgba(10, 10, 10, 0.15), rgba(10, 10, 10, 0.78) 80%),
     linear-gradient(180deg, rgba(10, 10, 10, 0.6) 0%, rgba(10, 10, 10, 0.3) 40%, var(--black) 100%);
 }
-.sora-wordmark {
-  font-family: var(--f-logo);
-  font-size: clamp(3.4rem, 13vw, 9.5rem);
-  letter-spacing: 0.2em;
-  line-height: 1;
-  margin: 20px 0 4px;
-  background: linear-gradient(120deg, #fff 30%, var(--blue-2) 75%, var(--gold-2) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: none;
+.sora-logo-mark--hero {
+  width: clamp(260px, 46vw, 520px);
+  height: auto;
+  margin: 22px 0 6px;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.45));
 }
 .sora-wordmark-by {
   font-size: 0.78rem;
   letter-spacing: 0.5em;
   text-transform: uppercase;
-  color: var(--blue-2);
+  color: var(--sora-accent);
 }
 .sora-chips { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 34px; }
 .sora-chip {
@@ -1594,34 +1603,41 @@ input, select, textarea { font-family: inherit; }
   padding: 11px 20px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(10, 10, 10, 0.45);
+  background: rgba(8, 51, 54, 0.4);
   backdrop-filter: blur(8px);
   font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
 }
-.sora-chip svg { width: 16px; height: 16px; color: var(--gold-2); }
+.sora-chip svg { width: 16px; height: 16px; color: #fff; }
 
-.tech-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px 40px; }
 .tech-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
   background: var(--ink);
-  border: 1px solid rgba(42, 107, 130, 0.25);
+  border: 1px solid rgba(107, 133, 134, 0.25);
   border-radius: 20px;
-  padding: 32px 26px;
+  padding: 30px 28px;
   transition: transform 0.45s var(--ease), border-color 0.45s;
 }
-.tech-card:hover { transform: translateY(-6px); border-color: rgba(42, 107, 130, 0.65); }
-.tech-card .v-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 15px;
-  background: rgba(42, 107, 130, 0.18);
+.tech-card:hover { transform: translateY(-6px); border-color: rgba(107, 133, 134, 0.7); }
+.tech-card .v-num {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--sora-line);
   display: grid;
   place-items: center;
-  margin-bottom: 20px;
+  font-family: var(--f-serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--sora-ink);
 }
-.tech-card .v-icon svg { width: 24px; height: 24px; color: var(--blue-2); }
 .tech-card h3 { font-family: var(--f-serif); font-size: 1.2rem; color: #fff; margin-bottom: 8px; }
 .tech-card p { color: var(--text-light); font-size: 0.88rem; }
 
@@ -1637,15 +1653,15 @@ input, select, textarea { font-family: inherit; }
   transition: transform 0.5s var(--ease), box-shadow 0.5s;
 }
 .model-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
-.model-card--fav { border: 2px solid var(--gold); transform: scale(1.03); }
+.model-card--fav { border: 2px solid var(--sora-ink); transform: scale(1.03); }
 .model-card--fav:hover { transform: scale(1.03) translateY(-8px); }
 .model-ribbon {
   position: absolute;
   top: 16px;
   right: -34px;
   z-index: 3;
-  background: linear-gradient(120deg, var(--gold), var(--gold-2));
-  color: var(--black);
+  background: linear-gradient(120deg, var(--sora-ink), var(--sora-line));
+  color: #fff;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -1658,12 +1674,12 @@ input, select, textarea { font-family: inherit; }
 .model-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.9s var(--ease); }
 .model-card:hover .model-media img { transform: scale(1.06); }
 .model-body { padding: 26px 26px 28px; display: flex; flex-direction: column; flex: 1; }
-.model-body .pc-cat { color: var(--blue-2); }
+.model-body .pc-cat { color: var(--sora-ink); }
 .model-body h3 { font-family: var(--f-serif); font-size: 1.45rem; font-weight: 600; color: var(--text-dark); margin: 6px 0 8px; }
 .model-body > p { color: var(--text-mid); font-size: 0.9rem; margin-bottom: 16px; }
 .model-feats { list-style: none; display: grid; gap: 9px; margin-bottom: 20px; }
 .model-feats li { display: flex; gap: 10px; align-items: flex-start; font-size: 0.84rem; color: var(--text-dark); }
-.model-feats svg { width: 16px; height: 16px; flex: none; color: var(--gold); margin-top: 2px; }
+.model-feats svg { width: 16px; height: 16px; flex: none; color: var(--sora-ink); margin-top: 2px; }
 .model-foot { margin-top: auto; }
 .model-price { font-size: 1.3rem; font-weight: 700; color: var(--text-dark); margin-bottom: 14px; }
 .model-price small { display: block; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 2px; }
@@ -1679,8 +1695,8 @@ input, select, textarea { font-family: inherit; }
   place-items: center;
   transition: all 0.3s;
 }
-.model-ctas .btn-icon svg { width: 20px; height: 20px; color: var(--green); }
-.model-ctas .btn-icon:hover { background: var(--green); border-color: var(--green); }
+.model-ctas .btn-icon svg { width: 20px; height: 20px; color: var(--sora-ink); }
+.model-ctas .btn-icon:hover { background: var(--sora-ink); border-color: var(--sora-ink); }
 .model-ctas .btn-icon:hover svg { color: #fff; }
 
 .sora-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; counter-reset: step; }
@@ -1691,7 +1707,7 @@ input, select, textarea { font-family: inherit; }
   font-size: 3.4rem;
   font-weight: 600;
   color: transparent;
-  -webkit-text-stroke: 1px var(--gold);
+  -webkit-text-stroke: 1px var(--sora-accent);
   line-height: 1;
   margin-bottom: 14px;
 }

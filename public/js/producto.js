@@ -11,6 +11,15 @@
 
   const CHECK =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>';
+  const PLAY =
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+
+  // La galería (foto + video) usa un solo arreglo de URLs; el tipo de cada
+  // una se detecta por extensión, sin necesidad de un campo aparte en la API.
+  const VIDEO_RE = /\.(mp4|mov|webm)(\?.*)?$/i;
+  function isVideo(url) {
+    return VIDEO_RE.test(url || '');
+  }
 
   function notFound() {
     document.title = 'Producto no encontrado · LOTTUS';
@@ -25,8 +34,12 @@
 
   function galleryHTML(images, name) {
     const imgs = images && images.length ? images : ['/img/seed/hero.jpg'];
-    const main = `<div class="pd-main" id="pdMain" title="Haz clic para ampliar la galería">
-      <img id="pdMainImg" src="${L.esc(imgs[0])}" alt="${L.esc(name)}" fetchpriority="high">
+    const firstIsVideo = isVideo(imgs[0]);
+    const mainMedia = firstIsVideo
+      ? `<video id="pdMainImg" src="${L.esc(imgs[0])}" controls playsinline preload="metadata"></video>`
+      : `<img id="pdMainImg" src="${L.esc(imgs[0])}" alt="${L.esc(name)}" fetchpriority="high">`;
+    const main = `<div class="pd-main${firstIsVideo ? ' pd-main--video' : ''}" id="pdMain" title="Haz clic para ampliar la galería">
+      ${mainMedia}
       <div class="pd-main-zoom-hint">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 15l6 6m-11-4a7 7 0 100-14 7 7 0 000 14zM10 7v6m-3-3h6"/></svg>
         <span>Ampliar</span>
@@ -35,10 +48,12 @@
     const thumbs =
       imgs.length > 1
         ? `<div class="pd-thumbs">${imgs
-            .map(
-              (u, i) =>
-                `<button class="pd-thumb${i === 0 ? ' active' : ''}" data-index="${i}" data-src="${L.esc(u)}" aria-label="Ver imagen ${i + 1}"><img src="${L.esc(u)}" alt=""></button>`
-            )
+            .map((u, i) => {
+              const v = isVideo(u);
+              return `<button class="pd-thumb${i === 0 ? ' active' : ''}" data-index="${i}" data-src="${L.esc(u)}" aria-label="Ver ${v ? 'video' : 'imagen'} ${i + 1}">
+                ${v ? `<video src="${L.esc(u)}" muted playsinline preload="metadata"></video><span class="pd-thumb-play">${PLAY}</span>` : `<img src="${L.esc(u)}" alt="">`}
+              </button>`;
+            })
             .join('')}</div>`
         : '';
     return main + thumbs;
@@ -191,12 +206,13 @@
     const allImages = p.images && p.images.length ? p.images : ['/img/seed/hero.jpg'];
     let currentIndex = 0;
 
-    const mainImg = document.getElementById('pdMainImg');
+    let mainImg = document.getElementById('pdMainImg');
     const pdMain = document.getElementById('pdMain');
 
     const lbModal = document.getElementById('pdLightbox');
     const lbStage = document.getElementById('pdlbStage');
     const lbImg = document.getElementById('pdlbImg');
+    const lbVideo = document.getElementById('pdlbVideo');
     const lbBg = document.getElementById('pdlbBg');
     const lbZoomHint = document.getElementById('pdlbZoomHint');
     const lbCounter = document.getElementById('pdlbCounter');
@@ -215,17 +231,49 @@
         : 'Pellizca o doble toque para ampliar';
     }
 
+    function syncMainMedia(url) {
+      const wantsVideo = isVideo(url);
+      const isCurrentlyVideo = mainImg.tagName === 'VIDEO';
+
+      if (wantsVideo !== isCurrentlyVideo) {
+        // <img> y <video> son tags distintos: no se puede solo cambiar el
+        // src, hay que reemplazar el elemento. Si era video, se pausa antes
+        // de quitarlo para no dejar audio sonando de fondo.
+        if (isCurrentlyVideo) mainImg.pause();
+        const fresh = document.createElement(wantsVideo ? 'video' : 'img');
+        fresh.id = 'pdMainImg';
+        if (wantsVideo) {
+          fresh.controls = true;
+          fresh.playsInline = true;
+          fresh.preload = 'metadata';
+          fresh.src = url;
+        } else {
+          fresh.alt = p.name || '';
+          fresh.src = url;
+        }
+        mainImg.replaceWith(fresh);
+        mainImg = fresh;
+      } else if (wantsVideo) {
+        mainImg.pause();
+        mainImg.src = url;
+      } else {
+        mainImg.classList.add('fade');
+        setTimeout(() => {
+          mainImg.src = url;
+          mainImg.onload = () => mainImg.classList.remove('fade');
+        }, 180);
+      }
+
+      pdMain.classList.toggle('pd-main--video', wantsVideo);
+    }
+
     function updateMainImage(index) {
       if (index < 0 || index >= allImages.length) return;
       currentIndex = index;
       content.querySelectorAll('.pd-thumb').forEach((b, i) => {
         b.classList.toggle('active', i === currentIndex);
       });
-      mainImg.classList.add('fade');
-      setTimeout(() => {
-        mainImg.src = allImages[currentIndex];
-        mainImg.onload = () => mainImg.classList.remove('fade');
-      }, 180);
+      syncMainMedia(allImages[currentIndex]);
     }
 
     content.querySelectorAll('.pd-thumb').forEach((btn, i) => {
@@ -248,11 +296,14 @@
       lbNext.style.display = 'flex';
       lbCounter.style.display = 'block';
 
-      lbThumbs.innerHTML = allImages.map((u, i) => `
-        <button class="pdlb-thumb${i === currentIndex ? ' active' : ''}" data-index="${i}" aria-label="Ver imagen ${i + 1}">
-          <img src="${L.esc(u)}" alt="">
+      lbThumbs.innerHTML = allImages.map((u, i) => {
+        const v = isVideo(u);
+        return `
+        <button class="pdlb-thumb${i === currentIndex ? ' active' : ''}" data-index="${i}" aria-label="Ver ${v ? 'video' : 'imagen'} ${i + 1}">
+          ${v ? `<video src="${L.esc(u)}" muted playsinline preload="metadata"></video><span class="pd-thumb-play">${PLAY}</span>` : `<img src="${L.esc(u)}" alt="">`}
         </button>
-      `).join('');
+      `;
+      }).join('');
 
       lbThumbs.querySelectorAll('.pdlb-thumb').forEach((btn, i) => {
         btn.addEventListener('click', () => setLbIndex(i));
@@ -261,24 +312,44 @@
 
     function setLbIndex(index) {
       if (!allImages.length) return;
+      if (lbVideo && !lbVideo.paused) lbVideo.pause();
       currentIndex = (index + allImages.length) % allImages.length;
       resetZoom(false);
 
       content.querySelectorAll('.pd-thumb').forEach((b, i) => {
         b.classList.toggle('active', i === currentIndex);
       });
-      mainImg.src = allImages[currentIndex];
+      const url = allImages[currentIndex];
+      syncMainMedia(url);
 
-      lbImg.classList.add('fade');
-      if (lbBg) lbBg.classList.remove('visible');
-      setTimeout(() => {
-        lbImg.src = allImages[currentIndex];
-        lbImg.onload = () => lbImg.classList.remove('fade');
-        if (lbBg) {
-          lbBg.style.backgroundImage = `url("${allImages[currentIndex]}")`;
-          lbBg.classList.add('visible');
+      const wantsVideo = isVideo(url);
+      lbModal.classList.toggle('lb-video-slide', wantsVideo);
+
+      if (wantsVideo) {
+        lbImg.style.display = 'none';
+        lbImg.removeAttribute('src');
+        if (lbBg) lbBg.classList.remove('visible');
+        if (lbVideo) {
+          lbVideo.style.display = '';
+          lbVideo.src = url;
         }
-      }, 150);
+      } else {
+        if (lbVideo) {
+          lbVideo.removeAttribute('src');
+          lbVideo.load();
+          lbVideo.style.display = 'none';
+        }
+        lbImg.style.display = '';
+        lbImg.classList.add('fade');
+        setTimeout(() => {
+          lbImg.src = url;
+          lbImg.onload = () => lbImg.classList.remove('fade');
+          if (lbBg) {
+            lbBg.style.backgroundImage = `url("${url}")`;
+            lbBg.classList.add('visible');
+          }
+        }, 150);
+      }
 
       lbCounter.textContent = `${currentIndex + 1} / ${allImages.length}`;
 
@@ -308,11 +379,18 @@
       lbModal.classList.remove('open');
       lbModal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      if (lbVideo && !lbVideo.paused) lbVideo.pause();
       resetZoom(false);
     }
 
     if (pdMain) {
-      pdMain.addEventListener('click', () => openLightbox(currentIndex));
+      // Si la diapositiva actual es video, se deja el reproductor nativo
+      // (con sus propios controles) en vez de abrir el lightbox al hacer
+      // clic — así el botón de play no dispara la galería por accidente.
+      pdMain.addEventListener('click', () => {
+        if (isVideo(allImages[currentIndex])) return;
+        openLightbox(currentIndex);
+      });
     }
 
     if (lbClose) lbClose.addEventListener('click', closeLightbox);
@@ -406,6 +484,10 @@
 
     if (lbStage) {
       lbStage.addEventListener('pointerdown', (e) => {
+        // El video usa sus propios controles nativos (play, scrubber,
+        // volumen, pantalla completa): no le pisamos el gesto con el
+        // pinch/pan/tap-zoom pensado para fotos.
+        if (isVideo(allImages[currentIndex])) return;
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         try { lbStage.setPointerCapture(e.pointerId); } catch (err) { /* iOS Safari a veces falla aquí; seguimos igual */ }
         pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -483,6 +565,7 @@
       // centrado en la posición del cursor — el gesto que un usuario de
       // escritorio espera encontrar primero.
       lbStage.addEventListener('wheel', (e) => {
+        if (isVideo(allImages[currentIndex])) return;
         e.preventDefault();
         const factor = e.deltaY < 0 ? 1.2 : 1 / 1.2;
         zoomAt(e.clientX, e.clientY, zScale * factor, false);

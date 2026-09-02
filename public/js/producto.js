@@ -15,6 +15,10 @@
     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
   const PAUSE =
     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+  const VOLUME_ON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M19 5a10 10 0 010 14"/></svg>';
+  const VOLUME_OFF =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
 
   // La galería (foto + video) usa un solo arreglo de URLs; el tipo de cada
   // una se detecta por extensión, sin necesidad de un campo aparte en la API.
@@ -45,12 +49,14 @@
   function galleryHTML(images, name) {
     const imgs = images && images.length ? images : ['/img/seed/hero.jpg'];
     const firstIsVideo = isVideo(imgs[0]);
+    const mainPoster = firstIsVideo ? videoPosterUrl(imgs[0]) : null;
     const mainMedia = firstIsVideo
-      ? `<video id="pdMainImg" src="${L.esc(imgs[0])}" playsinline preload="metadata" loop></video>`
+      ? `<video id="pdMainImg" src="${L.esc(imgs[0])}"${mainPoster ? ` poster="${L.esc(mainPoster)}"` : ''} playsinline preload="metadata" loop></video>`
       : `<img id="pdMainImg" src="${L.esc(imgs[0])}" alt="${L.esc(name)}" fetchpriority="high">`;
     const main = `<div class="pd-main${firstIsVideo ? ' pd-main--video' : ''}" id="pdMain" title="Haz clic para ampliar la galería">
       ${mainMedia}
       <button type="button" class="pd-media-play-btn" id="pdMainPlayBtn" aria-label="Reproducir o pausar video">${PLAY}</button>
+      <button type="button" class="pd-media-mute-btn" id="pdMainMuteBtn" aria-label="Silenciar o activar sonido"></button>
       <div class="pd-main-zoom-hint">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 15l6 6m-11-4a7 7 0 100-14 7 7 0 000 14zM10 7v6m-3-3h6"/></svg>
         <span>Ampliar</span>
@@ -61,8 +67,9 @@
         ? `<div class="pd-thumbs">${imgs
             .map((u, i) => {
               const v = isVideo(u);
+              const poster = v ? videoPosterUrl(u) : null;
               return `<button class="pd-thumb${i === 0 ? ' active' : ''}" data-index="${i}" data-src="${L.esc(u)}" aria-label="Ver ${v ? 'video' : 'imagen'} ${i + 1}">
-                ${v ? `<video src="${L.esc(u)}" muted playsinline preload="metadata"></video><span class="pd-thumb-play">${PLAY}</span>` : `<img src="${L.esc(u)}" alt="">`}
+                ${v ? `<video src="${L.esc(u)}"${poster ? ` poster="${L.esc(poster)}"` : ''} muted playsinline preload="metadata"></video><span class="pd-thumb-play">${PLAY}</span>` : `<img src="${L.esc(u)}" alt="">`}
               </button>`;
             })
             .join('')}</div>`
@@ -220,6 +227,7 @@
     let mainImg = document.getElementById('pdMainImg');
     const pdMain = document.getElementById('pdMain');
     const mainPlayBtn = document.getElementById('pdMainPlayBtn');
+    const mainMuteBtn = document.getElementById('pdMainMuteBtn');
 
     const lbModal = document.getElementById('pdLightbox');
     const lbStage = document.getElementById('pdlbStage');
@@ -253,6 +261,7 @@
       mainPlayBtn.innerHTML = mainImg.paused ? PLAY : PAUSE;
       mainImg.addEventListener('play', () => { mainPlayBtn.innerHTML = PAUSE; });
       mainImg.addEventListener('pause', () => { mainPlayBtn.innerHTML = PLAY; });
+      if (mainMuteBtn) mainMuteBtn.innerHTML = mainImg.muted ? VOLUME_OFF : VOLUME_ON;
     }
     if (mainPlayBtn) {
       mainPlayBtn.addEventListener('click', (e) => {
@@ -261,6 +270,19 @@
         if (mainImg.paused) mainImg.play(); else mainImg.pause();
       });
       wireMainVideo();
+    }
+    // El elemento <video> del visor principal se recrea al cambiar entre
+    // foto y video (ver syncMainMedia), así que perdería el estado de
+    // silencio — se recuerda la preferencia aparte para aplicarla de nuevo.
+    let mainMutedPreference = false;
+    if (mainMuteBtn) {
+      mainMuteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (mainImg.tagName !== 'VIDEO') return;
+        mainImg.muted = !mainImg.muted;
+        mainMutedPreference = mainImg.muted;
+        mainMuteBtn.innerHTML = mainImg.muted ? VOLUME_OFF : VOLUME_ON;
+      });
     }
 
     function syncMainMedia(url) {
@@ -278,6 +300,9 @@
           fresh.playsInline = true;
           fresh.preload = 'metadata';
           fresh.loop = true;
+          fresh.muted = mainMutedPreference;
+          const poster = videoPosterUrl(url);
+          if (poster) fresh.poster = poster;
           fresh.src = url;
         } else {
           fresh.alt = p.name || '';
@@ -288,6 +313,8 @@
         wireMainVideo();
       } else if (wantsVideo) {
         mainImg.pause();
+        const poster = videoPosterUrl(url);
+        if (poster) mainImg.poster = poster;
         mainImg.src = url;
       } else {
         mainImg.classList.add('fade');
@@ -331,9 +358,10 @@
 
       lbThumbs.innerHTML = allImages.map((u, i) => {
         const v = isVideo(u);
+        const poster = v ? videoPosterUrl(u) : null;
         return `
         <button class="pdlb-thumb${i === currentIndex ? ' active' : ''}" data-index="${i}" aria-label="Ver ${v ? 'video' : 'imagen'} ${i + 1}">
-          ${v ? `<video src="${L.esc(u)}" muted playsinline preload="metadata"></video><span class="pd-thumb-play">${PLAY}</span>` : `<img src="${L.esc(u)}" alt="">`}
+          ${v ? `<video src="${L.esc(u)}"${poster ? ` poster="${L.esc(poster)}"` : ''} muted playsinline preload="metadata"></video><span class="pd-thumb-play">${PLAY}</span>` : `<img src="${L.esc(u)}" alt="">`}
         </button>
       `;
       }).join('');
@@ -375,6 +403,7 @@
         }
         if (lbVideo) {
           lbVideo.style.display = '';
+          lbVideo.poster = videoPosterUrl(url) || '';
           lbVideo.src = url;
         }
       } else {
@@ -443,6 +472,16 @@
       lbPlayBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (lbVideo.paused) lbVideo.play(); else lbVideo.pause();
+      });
+    }
+
+    const lbMuteBtn = document.getElementById('pdlbMuteBtn');
+    if (lbMuteBtn && lbVideo) {
+      lbMuteBtn.innerHTML = lbVideo.muted ? VOLUME_OFF : VOLUME_ON;
+      lbMuteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        lbVideo.muted = !lbVideo.muted;
+        lbMuteBtn.innerHTML = lbVideo.muted ? VOLUME_OFF : VOLUME_ON;
       });
     }
 

@@ -1119,6 +1119,31 @@ input, select, textarea { font-family: inherit; }
 .pd-media-play-btn svg { width: 26px; height: 26px; }
 .pd-main--video .pd-media-play-btn { display: flex; }
 .pd-lightbox.lb-video-slide .pdlb-play-btn { display: flex; }
+
+/* Botón de silenciar — aparte del de play/pausa, en la esquina para no
+   estorbar el tap central. */
+.pd-media-mute-btn {
+  display: none;
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.2s, transform 0.2s, opacity 0.2s var(--ease);
+}
+.pd-media-mute-btn:hover { background: rgba(10, 10, 10, 0.75); transform: scale(1.06); }
+.pd-media-mute-btn svg { width: 18px; height: 18px; }
+.pd-main--video .pd-media-mute-btn { display: flex; }
+.pd-lightbox.lb-video-slide .pdlb-mute-btn { display: flex; }
+.pd-lightbox.pdlb-controls-hidden .pdlb-mute-btn { opacity: 0; pointer-events: none; }
 .pd-main-zoom-hint {
   position: absolute;
   bottom: 16px;

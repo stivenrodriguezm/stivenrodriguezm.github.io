@@ -1193,6 +1193,24 @@ input, select, textarea { font-family: inherit; }
 }
 .pd-lightbox.is-zoomed .pdlb-close { opacity: 0.5; }
 .pd-lightbox.is-zoomed .pdlb-close:hover { opacity: 1; }
+
+/* Mientras el video se reproduce sin interacción, la interfaz se retira
+   sola (como cualquier reproductor) — el botón de play/pausa rápido, el
+   resto de la galería (flechas, miniaturas) con una transición más lenta
+   para no sentirse brusco. Vuelve todo al mover el mouse o tocar. */
+.pdlb-play-btn { transition: opacity 0.2s var(--ease), background 0.2s, transform 0.2s; }
+.pd-lightbox.pdlb-controls-hidden .pdlb-play-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease);
+}
+.pd-lightbox.pdlb-controls-hidden .pdlb-arrow,
+.pd-lightbox.pdlb-controls-hidden .pdlb-footer,
+.pd-lightbox.pdlb-controls-hidden .pdlb-close {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.1s ease;
+}
 .pdlb-close {
   position: absolute;
   top: 24px;

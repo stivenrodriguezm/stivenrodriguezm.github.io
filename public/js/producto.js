@@ -407,6 +407,7 @@
     }
 
     function openLightbox(startIndex = 0) {
+      lbModal.classList.remove('pdlb-controls-hidden');
       renderLbThumbs();
       setLbIndex(startIndex);
       lbModal.classList.add('open');
@@ -442,6 +443,32 @@
       lbPlayBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (lbVideo.paused) lbVideo.play(); else lbVideo.pause();
+      });
+    }
+
+    // Auto-ocultar la interfaz del lightbox mientras el video se reproduce
+    // sin interacción — como cualquier reproductor: el botón de play/pausa
+    // (rápido) y el resto de la galería, flechas y miniaturas (más lento,
+    // para poder seguir navegando apenas se nota que están ahí) se retiran
+    // solos y vuelven al mover el mouse o tocar la pantalla.
+    let hideLbControlsTimer = null;
+    function showLbControls() {
+      lbModal.classList.remove('pdlb-controls-hidden');
+    }
+    function scheduleHideLbControls() {
+      clearTimeout(hideLbControlsTimer);
+      if (!lbVideo || lbVideo.paused || !isVideo(allImages[currentIndex])) return;
+      hideLbControlsTimer = setTimeout(() => {
+        lbModal.classList.add('pdlb-controls-hidden');
+      }, 2200);
+    }
+    if (lbVideo) {
+      lbVideo.addEventListener('play', scheduleHideLbControls);
+      lbVideo.addEventListener('pause', () => { clearTimeout(hideLbControlsTimer); showLbControls(); });
+    }
+    if (lbStage) {
+      ['pointermove', 'pointerdown', 'touchstart'].forEach((evt) => {
+        lbStage.addEventListener(evt, () => { showLbControls(); scheduleHideLbControls(); });
       });
     }
 

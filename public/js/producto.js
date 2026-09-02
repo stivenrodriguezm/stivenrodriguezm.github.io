@@ -13,12 +13,22 @@
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>';
   const PLAY =
     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  const PAUSE =
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
 
   // La galería (foto + video) usa un solo arreglo de URLs; el tipo de cada
   // una se detecta por extensión, sin necesidad de un campo aparte en la API.
   const VIDEO_RE = /\.(mp4|mov|webm)(\?.*)?$/i;
   function isVideo(url) {
     return VIDEO_RE.test(url || '');
+  }
+
+  // Cloudinary puede generar un frame del video como imagen con solo cambiar
+  // la extensión de la URL — se usa como fondo desenfocado del lightbox,
+  // igual que ya se hace con las fotos (ver .pdlb-bg).
+  function videoPosterUrl(url) {
+    if (!/res\.cloudinary\.com\/.+\/video\/upload\//.test(url || '')) return null;
+    return url.replace(VIDEO_RE, '.jpg');
   }
 
   function notFound() {
@@ -36,10 +46,11 @@
     const imgs = images && images.length ? images : ['/img/seed/hero.jpg'];
     const firstIsVideo = isVideo(imgs[0]);
     const mainMedia = firstIsVideo
-      ? `<video id="pdMainImg" src="${L.esc(imgs[0])}" controls playsinline preload="metadata"></video>`
+      ? `<video id="pdMainImg" src="${L.esc(imgs[0])}" playsinline preload="metadata" loop></video>`
       : `<img id="pdMainImg" src="${L.esc(imgs[0])}" alt="${L.esc(name)}" fetchpriority="high">`;
     const main = `<div class="pd-main${firstIsVideo ? ' pd-main--video' : ''}" id="pdMain" title="Haz clic para ampliar la galería">
       ${mainMedia}
+      <button type="button" class="pd-media-play-btn" id="pdMainPlayBtn" aria-label="Reproducir o pausar video">${PLAY}</button>
       <div class="pd-main-zoom-hint">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 15l6 6m-11-4a7 7 0 100-14 7 7 0 000 14zM10 7v6m-3-3h6"/></svg>
         <span>Ampliar</span>
@@ -208,6 +219,7 @@
 
     let mainImg = document.getElementById('pdMainImg');
     const pdMain = document.getElementById('pdMain');
+    const mainPlayBtn = document.getElementById('pdMainPlayBtn');
 
     const lbModal = document.getElementById('pdLightbox');
     const lbStage = document.getElementById('pdlbStage');
@@ -231,6 +243,26 @@
         : 'Pellizca o doble toque para ampliar';
     }
 
+    // El botón central de play/pausa reemplaza los controles nativos del
+    // video en el visor principal: los controles nativos tienen su propio
+    // botón de pantalla completa del navegador, que ignora nuestro diseño
+    // de lightbox y recorta el video (object-fit) de forma distinta — de
+    // ahí que antes el video se viera "roto" solo quando se ampliaba así.
+    function wireMainVideo() {
+      if (mainImg.tagName !== 'VIDEO') return;
+      mainPlayBtn.innerHTML = mainImg.paused ? PLAY : PAUSE;
+      mainImg.addEventListener('play', () => { mainPlayBtn.innerHTML = PAUSE; });
+      mainImg.addEventListener('pause', () => { mainPlayBtn.innerHTML = PLAY; });
+    }
+    if (mainPlayBtn) {
+      mainPlayBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (mainImg.tagName !== 'VIDEO') return;
+        if (mainImg.paused) mainImg.play(); else mainImg.pause();
+      });
+      wireMainVideo();
+    }
+
     function syncMainMedia(url) {
       const wantsVideo = isVideo(url);
       const isCurrentlyVideo = mainImg.tagName === 'VIDEO';
@@ -243,9 +275,9 @@
         const fresh = document.createElement(wantsVideo ? 'video' : 'img');
         fresh.id = 'pdMainImg';
         if (wantsVideo) {
-          fresh.controls = true;
           fresh.playsInline = true;
           fresh.preload = 'metadata';
+          fresh.loop = true;
           fresh.src = url;
         } else {
           fresh.alt = p.name || '';
@@ -253,6 +285,7 @@
         }
         mainImg.replaceWith(fresh);
         mainImg = fresh;
+        wireMainVideo();
       } else if (wantsVideo) {
         mainImg.pause();
         mainImg.src = url;
@@ -328,7 +361,18 @@
       if (wantsVideo) {
         lbImg.style.display = 'none';
         lbImg.removeAttribute('src');
-        if (lbBg) lbBg.classList.remove('visible');
+        if (lbBg) {
+          // Fondo desenfocado detrás del video (igual que en las fotos):
+          // Cloudinary puede entregar un frame del video como imagen con
+          // solo cambiar la extensión de la URL.
+          const poster = videoPosterUrl(url);
+          if (poster) {
+            lbBg.style.backgroundImage = `url("${poster}")`;
+            lbBg.classList.add('visible');
+          } else {
+            lbBg.classList.remove('visible');
+          }
+        }
         if (lbVideo) {
           lbVideo.style.display = '';
           lbVideo.src = url;
@@ -384,12 +428,20 @@
     }
 
     if (pdMain) {
-      // Si la diapositiva actual es video, se deja el reproductor nativo
-      // (con sus propios controles) en vez de abrir el lightbox al hacer
-      // clic — así el botón de play no dispara la galería por accidente.
-      pdMain.addEventListener('click', () => {
-        if (isVideo(allImages[currentIndex])) return;
-        openLightbox(currentIndex);
+      // El botón de play/pausa hace stopPropagation, así que un clic ahí
+      // nunca llega hasta acá — cualquier otro clic en el visor (foto o
+      // video) abre el lightbox en la diapositiva actual.
+      pdMain.addEventListener('click', () => openLightbox(currentIndex));
+    }
+
+    const lbPlayBtn = document.getElementById('pdlbPlayBtn');
+    if (lbPlayBtn && lbVideo) {
+      lbPlayBtn.innerHTML = lbVideo.paused ? PLAY : PAUSE;
+      lbVideo.addEventListener('play', () => { lbPlayBtn.innerHTML = PAUSE; });
+      lbVideo.addEventListener('pause', () => { lbPlayBtn.innerHTML = PLAY; });
+      lbPlayBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (lbVideo.paused) lbVideo.play(); else lbVideo.pause();
       });
     }
 
